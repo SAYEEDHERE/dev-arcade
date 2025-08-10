@@ -1,0 +1,1118 @@
+<!--
+  Dev Arcade Ultimate — Single-file app
+  File: dev-arcade-final-full.html
+
+  Features:
+  - Multiple mini-games (Memory, Slide Puzzle, Quiz, Snake, Tic-Tac-Toe, Minesweeper, 2048, Reaction Test, Typing Test, Flappy)
+  - Firebase Authentication (Google) + Firestore real-time leaderboards
+  - Local leaderboard fallback & offline-first pending queue
+  - "How to play" for each game, achievements, confetti, sounds, branding
+  - Export/import local scores, simple admin dismissal placeholder, and deploy-ready
+  - NOTE: You already provided firebaseConfig. It's embedded below as requested.
+
+  Quick dev preview:
+  - Run a local static server (recommended) so OAuth works:
+      python3 -m http.server 8080
+    then open:
+      http://localhost:8080/dev-arcade-final-full.html
+  - Make sure 'localhost' is added in Firebase Console -> Authentication -> Authorized domains.
+
+  Firestore rules suggested (apply in Firebase console before allowing writes):
+    rules_version = '2';
+    service cloud.firestore {
+      match /databases/{database}/documents {
+        match /leaderboards/{game}/scores/{doc} {
+          allow read: if true;
+          allow create: if request.auth != null
+            && request.resource.data.keys().hasAll(['uid','name','score','time','ts'])
+            && request.resource.data.uid == request.auth.uid
+            && request.resource.data.score is int
+            && request.resource.data.time is int
+            && request.resource.data.score >= 0
+            && request.resource.data.score < 100000000;
+          allow update, delete: if false;
+        }
+        match /users/{uid} {
+          allow read, write: if request.auth != null && request.auth.uid == uid;
+        }
+      }
+    }
+
+  Deploy:
+  - npm install -g firebase-tools
+  - firebase login
+  - firebase init hosting (choose project)
+  - firebase deploy --only hosting
+
+  Creator contact: reachout.sayeed@gmail.com
+-->
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Dev Arcade Ultimate — The Mind Maze (Sayeed)</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='96'%3E%F0%9F%A7%A0%3C/text%3E%3C/svg%3E">
+<style>
+/* =========================
+   Dev Arcade Ultimate - Styles
+   ========================= */
+:root{
+  --bg: #071226;
+  --panel: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  --glass: rgba(255,255,255,0.03);
+  --accent1: #7c3aed;
+  --accent2: #06b6d4;
+  --muted: #9fb3c8;
+  --neon: 0 0 32px rgba(124,58,237,0.12), 0 0 44px rgba(6,182,212,0.06);
+  --radius: 12px;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:
+  radial-gradient(900px 400px at 10% 10%, rgba(124,58,237,0.04), transparent 12%),
+  radial-gradient(700px 350px at 90% 90%, rgba(6,182,212,0.03), transparent 12%),
+  var(--bg);color:#e6eef8;-webkit-font-smoothing:antialiased;}
+.container{max-width:1280px;margin:20px auto;padding:18px;border-radius:14px;background:linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));box-shadow:0 14px 60px rgba(2,6,23,0.7);border:1px solid rgba(255,255,255,0.02);position:relative}
+.header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;gap:12px;align-items:center}
+.logo{width:72px;height:72px;border-radius:14px;background:linear-gradient(135deg,var(--accent1),var(--accent2));display:grid;place-items:center;font-weight:900;font-size:22px;color:white;box-shadow:var(--neon)}
+.title h1{margin:0;font-size:20px}
+.title p{margin:0;color:var(--muted);font-size:13px}
+.header-right{display:flex;gap:10px;align-items:center}
+
+.grid{display:grid;grid-template-columns:1fr 360px;gap:18px;margin-top:18px}
+.left{min-height:680px;padding:18px;border-radius:12px;background:linear-gradient(180deg, rgba(7,10,20,0.6), rgba(7,10,20,0.45));border:1px solid rgba(255,255,255,0.02)}
+.right{padding:18px;border-radius:12px;background:var(--panel);border:1px solid rgba(255,255,255,0.02)}
+
+.hud{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.stat{background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.02);font-weight:700}
+.controls{display:flex;gap:8px;align-items:center}
+.btn{cursor:pointer;padding:8px 12px;border-radius:10px;background:linear-gradient(90deg,var(--accent1),var(--accent2));border:none;color:white;font-weight:700;box-shadow:var(--neon);display:inline-flex;gap:8px;align-items:center}
+.btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);box-shadow:none}
+.menu-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:12px}
+.card{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);padding:14px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);cursor:pointer;display:flex;flex-direction:column;gap:8px;align-items:flex-start;transition:transform .18s, box-shadow .18s}
+.card:hover{transform:translateY(-6px);box-shadow:var(--neon)}
+.card .thumb{width:100%;height:120px;border-radius:8px;background:linear-gradient(135deg,var(--accent1),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:28px;color:white}
+.card .meta{font-size:13px;color:var(--muted)}
+.stage{margin-top:12px;border-radius:10px;height:520px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;padding:12px}
+.stageInner{width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column}
+.panel{padding:12px;border-radius:10px;background:linear-gradient(180deg,var(--glass),rgba(255,255,255,0.02));border:1px solid rgba(255,255,255,0.02)}
+.footer{display:flex;justify-content:space-between;align-items:center;margin-top:14px;color:var(--muted);font-size:13px}
+.iconBtn{display:inline-flex;gap:8px;align-items:center;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--muted);cursor:pointer}
+.icon{width:18px;height:18px;display:inline-block}
+.modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:linear-gradient(180deg,#071226,#08152a);padding:18px;border-radius:12px;z-index:1000;box-shadow:0 20px 80px rgba(2,6,23,0.9);border:1px solid rgba(255,255,255,0.03);max-width:880px;width:calc(100% - 40px)}
+.modal h3{margin:0 0 8px 0}
+.modal .close{position:absolute;right:12px;top:12px;cursor:pointer;color:var(--muted)}
+.small{font-size:13px;color:var(--muted)}
+.hidden{display:none}
+kbd{background:rgba(255,255,255,0.02);padding:4px 6px;border-radius:6px;font-weight:800}
+@media(max-width:980px){ .grid{grid-template-columns:1fr} .right{order:2} .left{order:1} .stage{height:560px} }
+</style>
+</head>
+<body>
+<div class="container" id="app">
+  <canvas id="confettiCanvas" style="position:fixed;left:0;top:0;pointer-events:none;z-index:60"></canvas>
+
+  <div class="header">
+    <div class="brand">
+      <div class="logo">MM</div>
+      <div class="title">
+        <h1>Dev Arcade Ultimate — The Mind Maze</h1>
+        <p>Single-file arcade — Built by <strong>Sayeed</strong></p>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <div id="userArea" class="small">Not signed in</div>
+      <button class="btn ghost" id="authBtn">Sign in</button>
+      <button class="btn" id="muteBtn">Mute</button>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="left">
+      <div class="hud">
+        <div class="stat"><small class="small">Game</small><div id="gameName">—</div></div>
+        <div class="stat"><small class="small">Score</small><div id="score">0</div></div>
+        <div class="stat"><small class="small">Time</small><div id="time">00:00</div></div>
+        <div style="flex:1"></div>
+        <div class="controls">
+          <button class="btn" id="playAll">Play Suite</button>
+          <button class="btn ghost" id="howBtn">How</button>
+          <button class="btn ghost" id="leaderBtn">Live Board</button>
+        </div>
+      </div>
+
+      <div style="height:12px"></div>
+
+      <!-- Sectioned Menu -->
+      <div class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><strong>Games</strong><div class="small">Choose a game</div></div>
+          <div><small class="small">Sections: Competitive • Classics • Puzzles • Arcade</small></div>
+        </div>
+
+        <div class="menu-grid" id="menuGrid">
+          <!-- cards injected by JS -->
+        </div>
+      </div>
+
+      <div class="stage panel" id="stage">
+        <div class="stageInner" id="stageInner">
+          <div style="text-align:center;color:var(--muted)">
+            <h2>Welcome to Dev Arcade Ultimate</h2>
+            <p class="small">Select a game to start. Sign in to publish scores on the live leaderboard.</p>
+            <div style="height:12px"></div>
+            <div style="display:flex;gap:8px;justify-content:center">
+              <button class="btn" id="startDefault">Play Default Run</button>
+              <button class="btn ghost" id="tourBtn">Tour</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <aside class="right panel">
+      <div>
+        <strong>Live Leaderboard</strong>
+        <div class="small" style="margin-top:6px">Realtime top scores (Firestore)</div>
+        <div style="height:12px"></div>
+        <div id="liveLeaderboard" class="small">Select a game to view its live top scores.</div>
+      </div>
+
+      <div style="height:12px"></div>
+
+      <div class="panel small">
+        <strong>Local Leaderboards</strong>
+        <ol id="localBoard" style="margin-left:18px;color:var(--muted)"></ol>
+        <div style="height:8px"></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn ghost" id="exportBtn">Export</button>
+          <button class="btn ghost" id="importBtn">Import</button>
+        </div>
+      </div>
+
+      <div style="height:12px"></div>
+
+      <div class="panel small">
+        <strong>Achievements</strong>
+        <ol id="achList" style="margin-left:18px;color:var(--muted)"></ol>
+      </div>
+
+    </aside>
+  </div>
+
+  <div class="footer">
+    <div>Made with ❤️ by Sayeed</div>
+    <div style="display:flex;gap:8px">
+      <a class="iconBtn" href="https://www.linkedin.com/in/sayeed-here/" target="_blank">
+        <svg class="icon" viewBox="0 0 24 24"><rect width="24" height="24" rx="4" fill="#0A66C2"></rect><path d="M6.94 8.5H9.4v8.6H6.94V8.5zM8.17 6.88a1.46 1.46 0 110-2.92 1.46 1.46 0 010 2.92zM11.2 12.6c0-1.78.96-2.6 2.28-2.6 1.04 0 1.6.55 1.86 1.03h.03V8.5h2.46v6.6h-2.46v-1.48c0-.4-.02-.8-.52-1.28-.5-.48-1.14-.46-1.56-.24-.42.22-.62.6-.62 1.16v1.84h-2.47z" fill="#fff"/></svg>
+        LinkedIn
+      </a>
+      <a class="iconBtn" href="https://github.com/SAYEEDHERE" target="_blank">
+        <svg class="icon" viewBox="0 0 24 24"><rect width="24" height="24" rx="4" fill="#0e1116"></rect><path d="M12 .5a12 12 0 00-3.8 23.4c.6.1.8-.26.8-.58v-2.12c-3.34.73-4.04-1.6-4.04-1.6-.54-1.36-1.32-1.72-1.32-1.72-1.08-.74.08-.72.08-.72 1.2.08 1.84 1.24 1.84 1.24 1.06 1.82 2.78 1.3 3.46.98.1-.78.42-1.3.76-1.6-2.66-.3-5.47-1.36-5.47-6.06 0-1.34.48-2.44 1.24-3.3-.12-.3-.54-1.52.12-3.16 0 0 1.02-.32 3.34 1.24a11.4 11.4 0 016.08 0c2.32-1.56 3.34-1.24 3.34-1.24.66 1.64.24 2.86.12 3.16.76.86 1.24 1.96 1.24 3.3 0 4.72-2.82 5.75-5.5 6.06.44.36.82 1.08.82 2.2v3.26c0 .32.2.7.82.58A12 12 0 0012 .5z" fill="#fff"/></svg>
+        GitHub
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase SDK (compat) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+/* ============================================================
+   Dev Arcade Ultimate - Single-file JS (comprehensive)
+   - Firebase config is embedded (you provided it)
+   - Games registry, UI, auth, leaderboards, offline sync
+   ============================================================ */
+
+/* --------------------------
+   FIREBASE CONFIG (USER-PROVIDED)
+   -------------------------- */
+const firebaseConfig = {
+  apiKey: "AIzaSyDzNwzn3KzTBErJLf_I8aogzGyaZNxtTSY",
+  authDomain: "dev-arcade-sayeed.firebaseapp.com",
+  projectId: "dev-arcade-sayeed",
+  storageBucket: "dev-arcade-sayeed.firebasestorage.app",
+  messagingSenderId: "312814244389",
+  appId: "1:312814244389:web:78d745495fd7d78d2ee5cc",
+  measurementId: "G-RVVZHSNR4M"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+/* --------------------------
+   Helpers & Globals
+   -------------------------- */
+const $ = sel => document.querySelector(sel);
+const $$ = sel => Array.from(document.querySelectorAll(sel));
+const el = id => document.getElementById(id);
+
+const confettiCanvas = el('confettiCanvas');
+const confettiCtx = confettiCanvas.getContext('2d');
+function resizeConfetti(){ confettiCanvas.width = window.innerWidth; confettiCanvas.height = window.innerHeight; }
+window.addEventListener('resize', resizeConfetti);
+resizeConfetti();
+function launchConfetti(n=100){
+  const pieces = [];
+  for(let i=0;i<n;i++){
+    pieces.push({x:Math.random()*confettiCanvas.width, y:-Math.random()*confettiCanvas.height, vx:(Math.random()-0.5)*8, vy:2+Math.random()*6, size:4+Math.random()*12, rot:Math.random()*360, color:`hsl(${Math.random()*360} 80% 60%)`});
+  }
+  let anim;
+  function draw(){
+    confettiCtx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
+    for(const p of pieces){
+      p.x += p.vx; p.y += p.vy; p.vy += 0.08; p.rot += 0.05;
+      confettiCtx.save(); confettiCtx.translate(p.x,p.y); confettiCtx.rotate(p.rot);
+      confettiCtx.fillStyle = p.color; confettiCtx.fillRect(-p.size/2,-p.size/2,p.size,p.size*0.6);
+      confettiCtx.restore();
+    }
+    if(pieces.some(p=>p.y < confettiCanvas.height+60)) requestAnimationFrame(draw);
+    else confettiCtx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
+  }
+  draw();
+}
+
+// Tiny audio engine (WebAudio)
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+const audioCtx = new AudioCtx();
+let globalMute = false;
+function playTone(freq=440, dur=0.06, type='sine', vol=0.06){
+  if(globalMute) return;
+  try {
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = type; o.frequency.value = freq; g.gain.value = vol;
+    o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + dur);
+  } catch(e){}
+}
+
+el('muteBtn').addEventListener('click', ()=>{
+  globalMute = !globalMute;
+  el('muteBtn').textContent = globalMute ? 'Unmute' : 'Mute';
+});
+
+// State
+let state = {
+  currentGameId: null,
+  running: false,
+  score: 0,
+  moves: 0,
+  startTime: 0,
+  elapsed: 0,
+  timer: null,
+  localScores: JSON.parse(localStorage.getItem('devarcade_local')||'{}'),
+  pending: JSON.parse(localStorage.getItem('devarcade_pending')||'{}'),
+  achievements: JSON.parse(localStorage.getItem('devarcade_ach')||'{}')
+};
+
+// UI refs
+const menuGrid = el('menuGrid');
+const stageInner = el('stageInner');
+const gameName = el('gameName');
+const scoreEl = el('score');
+const timeEl = el('time');
+const movesEl = el('moves');
+const liveLeaderboard = el('liveLeaderboard');
+const localBoard = el('localBoard');
+const authBtn = el('authBtn');
+const userArea = el('userArea');
+const howBtn = el('howBtn');
+const leaderBtn = el('leaderBtn');
+const startDefault = el('startDefault');
+const playAll = el('playAll');
+const achList = el('achList');
+const exportBtn = el('exportBtn');
+const importBtn = el('importBtn');
+
+// Utility helpers
+const msToTime = ms => {
+  const s = Math.floor(ms/1000), m = Math.floor(s/60), sec = s%60;
+  return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+};
+
+function uiUpdate(){
+  gameName.textContent = state.currentGameId ? (GAMES.find(g=>g.id===state.currentGameId).name) : '—';
+  scoreEl.textContent = state.score;
+  movesEl.textContent = state.moves;
+  timeEl.textContent = msToTime(state.elapsed);
+  renderLocalBoard();
+  renderAchievements();
+}
+
+function startTimer(){
+  state.startTime = Date.now();
+  state.timer = setInterval(()=>{ state.elapsed = Date.now() - state.startTime; uiUpdate(); }, 200);
+}
+function stopTimer(){ if(state.timer){ clearInterval(state.timer); state.timer = null; } }
+
+// Local leaderboard helpers
+function saveLocalScore(gameId, name, score, time){
+  const key = 'devarcade_local';
+  const data = JSON.parse(localStorage.getItem(key)||'{}');
+  data[gameId] = data[gameId] || [];
+  data[gameId].push({name,score,time,when:Date.now()});
+  data[gameId] = data[gameId].sort((a,b)=>b.score-a.score || a.time-b.time).slice(0,50);
+  localStorage.setItem(key, JSON.stringify(data));
+  state.localScores = data;
+  uiUpdate();
+}
+
+// Pending queue for offline
+function addPending(gameId, name, score, time){
+  const key = 'devarcade_pending';
+  const data = JSON.parse(localStorage.getItem(key)||'{}');
+  data[gameId] = data[gameId] || [];
+  data[gameId].push({name,score,time,when:Date.now()});
+  localStorage.setItem(key, JSON.stringify(data));
+  state.pending = data;
+}
+async function syncPending(){
+  if(!navigator.onLine) return;
+  if(!auth.currentUser) return;
+  const data = JSON.parse(localStorage.getItem('devarcade_pending')||'{}');
+  if(!data) return;
+  for(const gameId of Object.keys(data)){
+    for(const rec of data[gameId]){
+      try {
+        await db.collection('leaderboards').doc(gameId).collection('scores').add({
+          uid: auth.currentUser.uid,
+          name: rec.name,
+          score: Number(rec.score),
+          time: Number(rec.time || 0),
+          ts: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      } catch(e){ console.warn('sync pending failed', e); return; }
+    }
+  }
+  // clear pending on success
+  localStorage.removeItem('devarcade_pending');
+  state.pending = {};
+  uiUpdate();
+}
+
+// Live leaderboard subscription management
+let currentUnsub = null;
+function subscribeLiveLeaderboard(gameId){
+  // detach
+  if(currentUnsub) currentUnsub();
+  liveLeaderboard.innerHTML = '<div class="small">Loading live leaderboard...</div>';
+  try {
+    const ref = db.collection('leaderboards').doc(gameId).collection('scores').orderBy('score','desc').limit(15);
+    currentUnsub = ref.onSnapshot(snapshot=>{
+      const rows = [];
+      snapshot.forEach(doc=> {
+        const d = doc.data();
+        rows.push(`<li style="margin-bottom:6px"><strong>${escapeHtml(d.name||'Player')}</strong> — ${d.score} pts <span class="small" style="color:var(--muted)">(${d.time?msToTime(d.time):'—'})</span></li>`);
+      });
+      if(rows.length===0) liveLeaderboard.innerHTML = '<div class="small">No live scores yet — be the first!</div>';
+      else liveLeaderboard.innerHTML = `<ol style="margin-left:18px;color:var(--muted)">${rows.join('')}</ol>`;
+    }, err=>{
+      console.error('snapshot error', err);
+      liveLeaderboard.innerHTML = '<div class="small">Leaderboards unavailable (check rules/firestore)</div>';
+    });
+  } catch(e){
+    console.error(e);
+    liveLeaderboard.innerHTML = '<div class="small">Live board error</div>';
+  }
+}
+
+// Escape helper
+function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* --------------------------
+   Games Registry
+   Each entry: {id, name, section, thumb, desc, fn, how}
+   fn(container, finishCallback) -> finishCallback({score, time})
+   -------------------------- */
+
+const GAMES = [
+  { id:'memory', name:'Memory Match', section:'Puzzles', thumb:'🧠', desc:'Flip matching pairs quickly.', fn: game_memory, how: 'Flip cards to find matching pairs. Fewer moves and faster time = more score.' },
+  { id:'puzzle', name:'Slide Puzzle', section:'Puzzles', thumb:'🧩', desc:'Arrange tiles to reconstruct the image.', fn: game_puzzle, how: 'Rearrange tiles to complete the picture. Click tiles to swap.' },
+  { id:'quiz', name:'Quick Quiz', section:'Competitive', thumb:'❓', desc:'5 rapid programming questions.', fn: game_quiz, how: 'Answer 5 quick questions. Speed gives bonus points.' },
+  { id:'snake', name:'Snake', section:'Classics', thumb:'🐍', desc:'Grow by eating dots. Avoid collisions.', fn: game_snake, how: 'Use arrow keys to move. Eat apples to grow.' },
+  { id:'ttt', name:'Tic-Tac-Toe', section:'Classic', thumb:'⭕️', desc:'Local 2-player game.', fn: game_ttt, how: 'Hotseat 2-player Tic-Tac-Toe. Get 3 in a row to win.' },
+  { id:'mines', name:'Minesweeper', section:'Puzzles', thumb:'💣', desc:'Classic Minesweeper.', fn: game_mines, how: 'Reveal tiles, avoid mines. Use numbers as hints.' },
+  { id:'2048', name:'2048', section:'Puzzles', thumb:'🥲', desc:'Combine tiles to reach 2048.', fn: game_2048, how: 'Use arrow keys to slide tiles. Combine equal tiles to form higher numbers.' },
+  { id:'reaction', name:'Reaction Test', section:'Competitive', thumb:'⚡', desc:'How fast are you?', fn: game_reaction, how: 'Wait for the signal and click/tap as fast as possible. Multiple trials, median wins.' },
+  { id:'typing', name:'Typing Test', section:'Competitive', thumb:'⌨️', desc:'WPM & accuracy test.', fn: game_typing, how: 'Type the passage as fast and accurately as you can. WPM calculated.' },
+  { id:'flappy', name:'Flappy Bird', section:'Arcade', thumb:'🐦', desc:'Tap to fly through gaps.', fn: game_flappy, how: 'Tap or press Space to flap. Pass pipes to score.' }
+];
+
+// Build menu cards grouped by section
+function buildMenu(){
+  menuGrid.innerHTML = '';
+  const sections = {};
+  GAMES.forEach(g=> {
+    sections[g.section] = sections[g.section] || [];
+    sections[g.section].push(g);
+  });
+  for(const section of Object.keys(sections)){
+    const header = document.createElement('div'); header.innerHTML = `<div style="font-weight:800;margin-top:4px">${section}</div><div class="small" style="margin-bottom:6px">${sections[section].length} games</div>`;
+    menuGrid.appendChild(header);
+    sections[section].forEach(g=>{
+      const card = document.createElement('div'); card.className='card'; card.dataset.id=g.id;
+      card.innerHTML = `<div class="thumb">${g.thumb}</div><div style="display:flex;justify-content:space-between;width:100%"><div style="font-weight:800">${g.name}</div><div class="small">${g.section}</div></div><div class="meta">${g.desc}</div>`;
+      card.addEventListener('click', ()=> selectGame(g.id));
+      menuGrid.appendChild(card);
+    });
+  }
+}
+buildMenu();
+
+function selectGame(id){
+  const g = GAMES.find(x=>x.id===id);
+  if(!g) return;
+  state.currentGameId = id;
+  uiUpdate();
+  // highlight selected card
+  $$('.card').forEach(c=> c.style.outline = (c.dataset.id===id) ? '2px solid rgba(124,58,237,0.25)' : 'none');
+  // show game intro and Play button
+  stageInner.innerHTML = `<div style="text-align:center;width:100%"><h3 style="margin:0">${g.name}</h3><p class="small">${g.desc}</p><div style="height:12px"></div><div style="display:flex;gap:8px;justify-content:center"><button class="btn" id="playBtn">Play</button><button class="btn ghost" id="howPlay">How</button></div></div>`;
+  document.getElementById('playBtn').addEventListener('click', ()=> startGame(id));
+  document.getElementById('howPlay').addEventListener('click', ()=> showHow(g));
+  // update live leaderboard panel
+  subscribeLiveLeaderboard(id);
+}
+
+// Start selected game
+function startGame(id){
+  const g = GAMES.find(x=>x.id===id);
+  if(!g) return;
+  // clear snapshot if any
+  state.score = 0; state.moves = 0; state.elapsed = 0;
+  uiUpdate();
+  // call game function
+  try {
+    g.fn(stageInner, async (result)=>{
+      // result: {score, time}
+      state.score = result.score || state.score;
+      state.elapsed = result.time || state.elapsed;
+      stopTimer();
+      uiUpdate();
+      // show finish UI
+      stageInner.innerHTML = `<div style="text-align:center"><h3>Finished: ${g.name}</h3><p class="small">Score: <strong>${state.score}</strong> • Time: ${msToTime(state.elapsed)}</p><div style="height:10px"></div><div style="display:flex;gap:8px;justify-content:center"><button class="btn" id="saveScore">Save Score</button><button class="btn ghost" id="again">Play Again</button></div></div>`;
+      document.getElementById('again').addEventListener('click', ()=> startGame(id));
+      document.getElementById('saveScore').addEventListener('click', ()=> {
+        // Save local + try to publish
+        const displayName = auth.currentUser ? (auth.currentUser.displayName || auth.currentUser.email) : prompt('Enter name to save locally:', 'Guest') || 'Guest';
+        saveLocalScore(id, displayName, state.score, state.elapsed);
+        if(auth.currentUser){
+          // try publish to Firestore
+          db.collection('leaderboards').doc(id).collection('scores').add({
+            uid: auth.currentUser.uid,
+            name: displayName,
+            score: Number(state.score),
+            time: Number(state.elapsed),
+            ts: firebase.firestore.FieldValue.serverTimestamp()
+          }).then(()=> {
+            alert('Score published to live leaderboard!');
+          }).catch(err=>{
+            console.warn('publish failed, queued locally', err);
+            addPending(id, displayName, state.score, state.elapsed);
+            alert('Offline or rules prevented publish — score queued locally.');
+          });
+        } else {
+          // not signed in -> queue pending and prompt to sign in
+          addPending(id, displayName, state.score, state.elapsed);
+          if(confirm('Sign in to publish your score to the global leaderboard?')) openSignIn();
+          else alert('Saved locally. Sign in later to publish.');
+        }
+        launchConfetti(80);
+      });
+    });
+  } catch(e){
+    console.error('Game error', e);
+    stageInner.innerHTML = `<div style="text-align:center;color:red">Game error. Check console.</div>`;
+  }
+}
+
+/* --------------------------
+   AUTH
+   -------------------------- */
+auth.onAuthStateChanged(async user=>{
+  if(user){
+    userArea.innerHTML = `<strong>${escapeHtml(user.displayName || user.email || 'Player')}</strong>`;
+    authBtn.textContent = 'Sign out';
+    // try sync pending
+    await syncPending();
+  } else {
+    userArea.textContent = 'Not signed in';
+    authBtn.textContent = 'Sign in';
+  }
+});
+
+authBtn.addEventListener('click', ()=> {
+  if(auth.currentUser) auth.signOut();
+  else openSignIn();
+});
+
+function openSignIn(){
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider).then(()=> {
+    // success
+  }).catch(err=>{
+    console.error('Sign-in failed', err);
+    alert('Sign-in failed: '+err.message + '\nMake sure localhost is added to authorized domains in Firebase Auth.');
+  });
+}
+
+/* --------------------------
+   HOW / LEADER / EXPORT UI
+   -------------------------- */
+howBtn.addEventListener('click', ()=> {
+  const g = GAMES.find(x=>x.id===state.currentGameId);
+  if(!g) return alert('Select a game first.');
+  showHow(g);
+});
+
+leaderBtn.addEventListener('click', ()=> {
+  const id = state.currentGameId;
+  if(!id) return alert('Select a game first.');
+  subscribeLiveLeaderboard(id);
+  alert('Live leaderboard updated in the right panel.');
+});
+
+function showHow(game){
+  const html = `<h3>How to play — ${game.name}</h3>
+    <p class="small">${escapeHtml(game.how)}</p>
+    <p class="small">Scoring: speed + accuracy when applicable. Save scores after finishing. Sign in to publish.</p>
+    <div style="height:8px"></div><div class="small">Controls: keyboard & touch where applicable.</div>`;
+  showModal(html);
+}
+
+function showModal(html){
+  const modal = document.createElement('div'); modal.className='modal';
+  modal.innerHTML = `<div class="close">✕</div>${html}`;
+  document.body.appendChild(modal);
+  modal.querySelector('.close').addEventListener('click', ()=> modal.remove());
+}
+
+exportBtn.addEventListener('click', ()=>{
+  const data = localStorage.getItem('devarcade_local') || '{}';
+  const blob = new Blob([data], {type:'application/json'}); const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'devarcade-local-scores.json'; a.click(); URL.revokeObjectURL(url);
+});
+
+importBtn.addEventListener('click', ()=> {
+  const inp = document.createElement('input'); inp.type='file'; inp.accept='.json';
+  inp.addEventListener('change', e=>{
+    const f = e.target.files[0];
+    if(!f) return;
+    const reader = new FileReader();
+    reader.onload = ()=> {
+      try {
+        const obj = JSON.parse(reader.result);
+        localStorage.setItem('devarcade_local', JSON.stringify(obj));
+        state.localScores = obj;
+        alert('Imported local scores.');
+        uiUpdate();
+      } catch(e){ alert('Invalid file'); }
+    };
+    reader.readAsText(f);
+  });
+  inp.click();
+});
+
+/* --------------------------
+   Achievements (simple)
+   -------------------------- */
+function awardAchievement(key, text){
+  if(state.achievements[key]) return;
+  state.achievements[key] = {text, when:Date.now()};
+  localStorage.setItem('devarcade_ach', JSON.stringify(state.achievements));
+  renderAchievements();
+  showModal(`<h3>Achievement unlocked</h3><p>${escapeHtml(text)}</p>`);
+}
+function renderAchievements(){
+  achList.innerHTML = '';
+  const keys = Object.keys(state.achievements || {});
+  if(keys.length===0) achList.innerHTML = '<li style="color:var(--muted)">No achievements yet</li>';
+  else keys.forEach(k=>{
+    const v = state.achievements[k];
+    const li = document.createElement('li'); li.style.color='var(--muted)'; li.textContent = `${v.text} • ${new Date(v.when).toLocaleString()}`; achList.appendChild(li);
+  });
+}
+
+/* --------------------------
+   Simple UI / default run controls
+   -------------------------- */
+startDefault.addEventListener('click', ()=> {
+  // run a short suite: memory -> puzzle -> quiz
+  (async ()=>{
+    const run = ['memory','puzzle','quiz'];
+    for(const id of run){
+      selectGame(id);
+      // auto start
+      await new Promise(res => {
+        startGame(id);
+        // When finish screen shown, wait for Save or Play Again; we will set a polling
+        const check = setInterval(()=>{
+          // if stageInner contains 'Finished' text, assume done
+          if(stageInner.innerText.includes('Finished:')){ clearInterval(check); setTimeout(res, 400); }
+        }, 400);
+      });
+    }
+    alert('Default run complete!');
+  })();
+});
+
+playAll.addEventListener('click', ()=> startDefault.click());
+
+/* --------------------------
+   Render local leaderboard initially
+   -------------------------- */
+function renderLocalBoard(){
+  localBoard.innerHTML = '';
+  const data = JSON.parse(localStorage.getItem('devarcade_local')||'{}');
+  const g = state.currentGameId || Object.keys(data)[0];
+  if(!g || !data[g] || data[g].length===0){ localBoard.innerHTML = '<li style="color:var(--muted)">No local scores</li>'; return; }
+  data[g].slice(0,10).forEach(rec=>{
+    const li = document.createElement('li'); li.style.color='var(--muted)'; li.innerHTML = `${escapeHtml(rec.name)} — ${rec.score}pts (${msToTime(rec.time||0)})`; localBoard.appendChild(li);
+  });
+}
+
+/* ============================
+   Games implementations
+   Each game -> function(container, done)
+   where done({score, time})
+   ============================ */
+
+/* ---- Game: Memory Match ---- */
+function game_memory(container, done){
+  container.innerHTML = ''; stopTimer();
+  const symbols = ['★','☯','✦','♠','♣','♥','♦','✺','⚑','⚙','☀','☾','⚡','✶','✹','✿'];
+  const pairs = 8;
+  const selected = shuffle(symbols).slice(0,pairs);
+  const cards = shuffle(selected.concat(selected));
+  const grid = document.createElement('div'); grid.style.display='grid'; grid.style.gridTemplateColumns='repeat(4,1fr)'; grid.style.gap='12px'; grid.style.width='100%';
+  container.appendChild(grid);
+  state.moves = 0; state.score = 0; uiUpdate();
+  const st = { revealed:[], matched:0, lock:false };
+  cards.forEach((s,i)=>{
+    const c = document.createElement('div'); c.className='card'; c.style.height='96px'; c.style.fontSize='34px'; c.textContent='';
+    c.dataset.sym = s; c.dataset.i = i;
+    c.addEventListener('click', ()=>{
+      if(st.lock) return;
+      if(c.classList.contains('revealed')) return;
+      c.classList.add('revealed'); c.textContent = s;
+      state.moves++; uiUpdate(); playTone(600,0.04);
+      st.revealed.push(c);
+      if(st.revealed.length===2){
+        const [a,b] = st.revealed; st.lock = true;
+        setTimeout(()=>{
+          if(a.dataset.sym === b.dataset.sym){
+            a.classList.add('matched'); b.classList.add('matched'); st.matched++; state.score += 150; playTone(1000,0.08);
+          } else {
+            a.classList.remove('revealed'); b.classList.remove('revealed'); a.textContent=''; b.textContent=''; playTone(220,0.06);
+          }
+          st.revealed = []; st.lock=false; uiUpdate();
+          if(st.matched === pairs){ stopTimer(); awardAchievement('memory_first', 'Memory Master: completed Memory Match'); done({score:state.score, time: state.elapsed}); }
+        }, 600);
+      }
+    });
+    grid.appendChild(c);
+  });
+  // reveal briefly
+  Array.from(grid.children).forEach((c,i)=> setTimeout(()=>{ c.classList.add('revealed'); c.textContent = c.dataset.sym; }, 80 + i*30));
+  setTimeout(()=> Array.from(grid.children).forEach(c=>{ c.classList.remove('revealed'); c.textContent=''; }), 1200);
+  startTimer();
+}
+
+/* ---- Game: Slide Puzzle (simple swap) ---- */
+function game_puzzle(container, done){
+  container.innerHTML = ''; stopTimer();
+  const size = 4; const total = size*size;
+  const puzzle = document.createElement('div'); puzzle.style.display='grid'; puzzle.style.gridTemplateColumns = `repeat(${size}, 1fr)`; puzzle.style.gap='6px'; puzzle.style.width='100%';
+  const bg = proceduralSVG(800);
+  let tiles = Array.from({length:total}, (_,i)=>i);
+  tiles = shuffle(tiles);
+  tiles.forEach((idx,pos)=>{
+    const tile = document.createElement('div'); tile.style.height='96px'; tile.style.borderRadius='6px';
+    if(idx===total-1){ tile.className='p-empty'; tile.style.background='linear-gradient(90deg, rgba(255,255,255,0.01), rgba(255,255,255,0.01))'; tile.textContent=''; }
+    else { tile.className='p-piece'; tile.style.backgroundImage=bg; tile.style.backgroundSize=`${size*100}% ${size*100}%`; const r=Math.floor(idx/size), c=idx%size; tile.style.backgroundPosition=`${(c/(size-1))*100}% ${(r/(size-1))*100}%`; }
+    tile.dataset.correct = idx; tile.dataset.pos = pos;
+    tile.addEventListener('click', ()=> {
+      const children = Array.from(puzzle.children);
+      const emptyIdx = children.findIndex(ch=>ch.classList.contains('p-empty'));
+      const myIdx = children.indexOf(tile);
+      swapTiles(puzzle, myIdx, emptyIdx);
+      state.moves++; uiUpdate(); playTone(720,0.04);
+      const doneFlag = Array.from(puzzle.children).every((ch, idx) => Number(ch.dataset.correct) === idx);
+      if(doneFlag){ stopTimer(); awardAchievement('puzzle_first','Puzzle Solver'); done({score:700, time: state.elapsed}); }
+    });
+    puzzle.appendChild(tile);
+  });
+  container.appendChild(puzzle);
+  startTimer();
+  function swapTiles(puz,a,b){
+    const ch = Array.from(puz.children);
+    const A = ch[a], B = ch[b];
+    const aHTML = A.innerHTML, aClass = A.className, aCorrect = A.dataset.correct;
+    A.innerHTML = B.innerHTML; A.className = B.className; A.dataset.correct = B.dataset.correct;
+    B.innerHTML = aHTML; B.className = aClass; B.dataset.correct = aCorrect;
+  }
+}
+function proceduralSVG(size=800){
+  const svg = encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size}'><defs><linearGradient id='g' x1='0' x2='1'><stop offset='0' stop-color='#7c3aed'/><stop offset='1' stop-color='#06b6d4'/></linearGradient></defs><rect width='100%' height='100%' fill='url(#g)'/><circle cx='200' cy='180' r='160' fill='rgba(255,255,255,0.04)'/><circle cx='560' cy='520' r='140' fill='rgba(255,255,255,0.03)'/></svg>`);
+  return `url("data:image/svg+xml;utf8,${svg}")`;
+}
+
+/* ---- Game: Quick Quiz ---- */
+function game_quiz(container, done){
+  container.innerHTML = ''; stopTimer();
+  const qset = [
+    {q:'Which data structure is FIFO?', a:['Stack','Queue','Tree','Hash'], c:1},
+    {q:'SQL stands for?', a:['Strong Query Lang','Structured Query Language','Simple Query List','Server Query Logic'], c:1},
+    {q:'Single-file project uses?', a:['Python','HTML','C++','Java'], c:1},
+    {q:'Which is NOT a JS framework?', a:['React','Vue','Laravel','Angular'], c:2},
+    {q:'Array method to add at end?', a:['push','pop','shift','unshift'], c:0}
+  ];
+  let i=0, localScore=0;
+  const wrap = document.createElement('div'); wrap.style.width='100%';
+  container.appendChild(wrap);
+  startTimer();
+  renderQ();
+  function renderQ(){
+    wrap.innerHTML = '';
+    const cur = qset[i];
+    const qEl = document.createElement('div'); qEl.className='small'; qEl.style.fontSize='18px'; qEl.textContent = `Q${i+1}. ${cur.q}`;
+    wrap.appendChild(qEl);
+    cur.a.forEach((opt, idx)=>{
+      const b = document.createElement('div'); b.className='btn ghost'; b.style.display='block'; b.style.width='100%'; b.style.marginTop='8px';
+      b.textContent = opt;
+      b.addEventListener('click', ()=>{
+        if(idx===cur.c){ b.style.background='linear-gradient(90deg,#06b6d4,#7c3aed)'; localScore += 200; playTone(900,0.06); }
+        else { b.style.opacity = 0.6; playTone(240,0.06); }
+        i++; state.moves++; uiUpdate();
+        setTimeout(()=>{ if(i>=qset.length){ state.score += localScore; stopTimer(); awardAchievement('quiz_master','Quiz Whiz'); done({score:state.score, time:state.elapsed}); } else renderQ(); }, 700);
+      });
+      wrap.appendChild(b);
+    });
+  }
+}
+
+/* ---- Game: Snake ---- */
+function game_snake(container, done){
+  container.innerHTML = ''; stopTimer();
+  const canvas = document.createElement('canvas'); canvas.width = Math.min(780, window.innerWidth-300); canvas.height = 420; canvas.style.borderRadius='8px';
+  container.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+  const grid = 20;
+  const w = Math.floor(canvas.width / grid), h = Math.floor(canvas.height / grid);
+  let snake = [{x:Math.floor(w/2), y:Math.floor(h/2)}]; let dir = {x:1,y:0}; let apple = spawn(); let tick;
+  state.score = 0; state.moves = 0; uiUpdate(); startTimer();
+  function spawn(){ return {x: rand(w), y: rand(h)}; }
+  function draw(){
+    ctx.fillStyle = '#06111a'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle='tomato'; ctx.fillRect(apple.x*grid, apple.y*grid, grid-2, grid-2);
+    ctx.fillStyle='lime'; snake.forEach(s=> ctx.fillRect(s.x*grid, s.y*grid, grid-2, grid-2));
+  }
+  function step(){
+    const head = {x:snake[0].x + dir.x, y:snake[0].y + dir.y};
+    if(head.x < 0) head.x = w-1; if(head.x >= w) head.x = 0;
+    if(head.y < 0) head.y = h-1; if(head.y >= h) head.y = 0;
+    if(snake.some(s=>s.x===head.x && s.y===head.y)){ clearInterval(tick); window.removeEventListener('keydown', onKey); stopTimer(); alert('Game over — score: '+state.score); done({score: state.score, time: state.elapsed}); return; }
+    snake.unshift(head);
+    if(head.x===apple.x && head.y===apple.y){ state.score += 50; apple = spawn(); playTone(1000,0.06); state.moves++; uiUpdate(); } else snake.pop();
+    draw();
+  }
+  tick = setInterval(step, 120);
+  function onKey(e){
+    if(e.key==='ArrowUp' && dir.y!==1) dir={x:0,y:-1};
+    if(e.key==='ArrowDown' && dir.y!==-1) dir={x:0,y:1};
+    if(e.key==='ArrowLeft' && dir.x!==1) dir={x:-1,y:0};
+    if(e.key==='ArrowRight' && dir.x!==-1) dir={x:1,y:0};
+  }
+  window.addEventListener('keydown', onKey);
+  // safety: auto finish after 2.5 minutes
+  setTimeout(()=>{ clearInterval(tick); window.removeEventListener('keydown', onKey); stopTimer(); done({score:state.score, time:state.elapsed}); }, 150000);
+}
+
+/* ---- Game: Tic-Tac-Toe ---- */
+function game_ttt(container, done){
+  container.innerHTML = ''; stopTimer();
+  const grid = document.createElement('div'); grid.style.display='grid'; grid.style.gridTemplateColumns='repeat(3,120px)'; grid.style.gap='8px';
+  container.appendChild(grid);
+  const board = Array(9).fill(null); let turn='X';
+  function render(){
+    grid.innerHTML=''; board.forEach((v,i)=>{
+      const c = document.createElement('div'); c.style.width='120px'; c.style.height='120px'; c.style.display='grid'; c.style.placeItems='center'; c.style.fontSize='48px'; c.style.borderRadius='8px'; c.style.cursor='pointer'; c.style.background='linear-gradient(180deg, rgba(255,255,255,0.01), transparent)'; c.textContent = v || '';
+      c.addEventListener('click', ()=> {
+        if(board[i]) return;
+        board[i] = turn; state.moves++; uiUpdate(); playTone(turn==='X'?800:600,0.05); render();
+        const winner = checkWin();
+        if(winner){ setTimeout(()=>{ alert(`${winner} wins!`); done({score: winner==='X'?300:300, time: state.elapsed}); }, 80); }
+        else if(board.every(Boolean)){ setTimeout(()=>{ alert('Draw!'); done({score:50, time: state.elapsed}); },80); }
+        turn = (turn==='X'?'O':'X');
+      });
+      grid.appendChild(c);
+    });
+  }
+  function checkWin(){ const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]; for(const w of wins){ const [a,b,c] = w; if(board[a] && board[a]===board[b] && board[a]===board[c]) return board[a]; } return null; }
+  startTimer(); render();
+}
+
+/* ---- Game: Minesweeper ---- */
+function game_mines(container, done){
+  container.innerHTML = ''; stopTimer();
+  // Basic minesweeper implementation - 8x8 with 10 mines (intermediate)
+  const rows = 8, cols = 8, minesCount = 10;
+  const wrap = document.createElement('div'); wrap.style.display='inline-block';
+  const grid = document.createElement('div'); grid.style.display='grid'; grid.style.gridTemplateColumns=`repeat(${cols},36px)`; grid.style.gap='4px';
+  wrap.appendChild(grid);
+  container.appendChild(wrap);
+  let board = Array(rows).fill(0).map(()=>Array(cols).fill({}));
+  // init cells
+  const cells = [];
+  for(let r=0;r<rows;r++){
+    for(let c=0;c<cols;c++){
+      const cell = {r,c,isMine:false,adj:0,revealed:false,flagged:false,el:null};
+      cells.push(cell);
+    }
+  }
+  // place mines
+  const shuffled = shuffle(cells).slice(0,minesCount);
+  shuffled.forEach(ch=> ch.isMine = true);
+  // map cells into 2d
+  const map = {};
+  cells.forEach(ch=> map[`${ch.r},${ch.c}`] = ch);
+  // compute adjacents
+  cells.forEach(ch=>{
+    let adj=0;
+    for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++){
+      if(dr===0 && dc===0) continue;
+      const nr = ch.r+dr, nc = ch.c+dc;
+      if(nr<0||nr>=rows||nc<0||nc>=cols) continue;
+      if(map[`${nr},${nc}`] && map[`${nr},${nc}`].isMine) adj++;
+    }
+    ch.adj = adj;
+  });
+  // render
+  cells.forEach(ch=>{
+    const b = document.createElement('div'); b.style.width='36px'; b.style.height='36px'; b.style.borderRadius='6px'; b.style.display='grid'; b.style.placeItems='center'; b.style.background='linear-gradient(180deg, rgba(255,255,255,0.01), transparent)'; b.style.cursor='pointer';
+    b.textContent = '';
+    b.addEventListener('click', ()=> reveal(ch));
+    b.addEventListener('contextmenu', (e)=> { e.preventDefault(); ch.flagged = !ch.flagged; b.textContent = ch.flagged ? '⚑' : ''; });
+    ch.el = b; grid.appendChild(b);
+  });
+  startTimer();
+  function reveal(ch){
+    if(ch.revealed || ch.flagged) return;
+    ch.revealed = true; ch.el.style.background = '#f3f6f9'; ch.el.style.color='#06142a';
+    if(ch.isMine){ ch.el.textContent = '💣'; stopTimer(); alert('Boom! You hit a mine.'); done({score:0, time: state.elapsed}); return; }
+    if(ch.adj>0) ch.el.textContent = ch.adj;
+    else {
+      // flood fill
+      for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++){
+        const nr = ch.r+dr, nc = ch.c+dc;
+        const n = map[`${nr},${nc}`];
+        if(n && !n.revealed) reveal(n);
+      }
+    }
+    // check win
+    const safeLeft = cells.filter(x=>!x.isMine && !x.revealed).length;
+    if(safeLeft===0){ stopTimer(); awardAchievement('mines_first','Minesweeper Ace'); done({score:500 + (300 - Math.floor(state.elapsed/1000)), time:state.elapsed}); }
+  }
+}
+
+/* ---- Game: 2048 (simple) ---- */
+function game_2048(container, done){
+  container.innerHTML = ''; stopTimer();
+  const size = 4;
+  const wrap = document.createElement('div'); wrap.style.display='inline-block';
+  const board = Array.from({length:size}, ()=>Array(size).fill(0));
+  const elBoard = document.createElement('div'); elBoard.style.display='grid'; elBoard.style.gridTemplateColumns=`repeat(${size}, 90px)`; elBoard.style.gap='8px';
+  wrap.appendChild(elBoard); container.appendChild(wrap);
+  function render(){
+    elBoard.innerHTML='';
+    for(let r=0;r<size;r++) for(let c=0;c<size;c++){
+      const v = board[r][c];
+      const tile = document.createElement('div'); tile.style.width='90px'; tile.style.height='90px'; tile.style.borderRadius='8px'; tile.style.display='grid'; tile.style.placeItems='center'; tile.style.fontSize='22px'; tile.style.fontWeight='800';
+      tile.style.background = v ? 'linear-gradient(135deg,#fff,#f0f0ff)' : 'rgba(255,255,255,0.02)'; tile.style.color = v ? '#06142a' : 'var(--muted)';
+      tile.textContent = v || '';
+      elBoard.appendChild(tile);
+    }
+  }
+  function addRandom(){
+    const empties = [];
+    for(let r=0;r<size;r++) for(let c=0;c<size;c++) if(board[r][c]===0) empties.push([r,c]);
+    if(empties.length===0) return;
+    const [r,c] = empties[rand(empties.length)];
+    board[r][c] = Math.random() < 0.9 ? 2 : 4;
+  }
+  function moveLeft(){
+    let moved=false;
+    for(let r=0;r<size;r++){
+      let row = board[r].filter(v=>v);
+      for(let i=0;i<row.length-1;i++){
+        if(row[i]===row[i+1]){ row[i]*=2; row[i+1]=0; i++; }
+      }
+      row = row.filter(v=>v);
+      while(row.length < size) row.push(0);
+      for(let c=0;c<size;c++){ if(board[r][c]!==row[c]) moved=true; board[r][c]=row[c]; }
+    }
+    if(moved) addRandom();
+    render();
+    checkGameOver();
+  }
+  function moveRight(){ rotate180(); moveLeft(); rotate180(); }
+  function moveUp(){ rotate90(); moveLeft(); rotate270(); }
+  function moveDown(){ rotate270(); moveLeft(); rotate90(); }
+  function rotate90(){ const tmp = Array.from({length:size}, ()=>Array(size).fill(0)); for(let r=0;r<size;r++) for(let c=0;c<size;c++) tmp[c][size-1-r]=board[r][c]; for(let r=0;r<size;r++) for(let c=0;c<size;c++) board[r][c]=tmp[r][c]; }
+  function rotate180(){ rotate90(); rotate90(); }
+  function rotate270(){ rotate90(); rotate90(); rotate90(); }
+  function checkGameOver(){
+    const flat = board.flat();
+    if(flat.some(x=>x===2048)) { stopTimer(); awardAchievement('2048_win','Reached 2048'); done({score: Math.max(...flat), time: state.elapsed}); return; }
+    const movesPossible = canMove();
+    if(!movesPossible){ stopTimer(); alert('Game over!'); done({score: Math.max(...flat), time: state.elapsed}); }
+  }
+  function canMove(){
+    for(let r=0;r<size;r++) for(let c=0;c<size;c++) if(board[r][c]===0) return true;
+    for(let r=0;r<size;r++) for(let c=0;c<size-1;c++) if(board[r][c]===board[r][c+1]) return true;
+    for(let c=0;c<size;c++) for(let r=0;r<size-1;r++) if(board[r][c]===board[r+1][c]) return true;
+    return false;
+  }
+
+  addRandom(); addRandom(); render(); startTimer();
+  function onKey(e){
+    if(e.key==='ArrowLeft'){ moveLeft(); state.moves++; uiUpdate(); }
+    if(e.key==='ArrowRight'){ moveRight(); state.moves++; uiUpdate(); }
+    if(e.key==='ArrowUp'){ moveUp(); state.moves++; uiUpdate(); }
+    if(e.key==='ArrowDown'){ moveDown(); state.moves++; uiUpdate(); }
+  }
+  window.addEventListener('keydown', onKey);
+  // cleanup after 3 minutes
+  setTimeout(()=>{ window.removeEventListener('keydown', onKey); stopTimer(); done({score: Math.max(...board.flat()), time: state.elapsed}); }, 180000);
+}
+
+/* ---- Game: Reaction Test ---- */
+function game_reaction(container, done){
+  container.innerHTML = ''; stopTimer();
+  const wrap = document.createElement('div'); wrap.style.textAlign='center'; container.appendChild(wrap);
+  const info = document.createElement('div'); info.className='small'; info.textContent='Wait for green then click/tap as fast as possible.'; wrap.appendChild(info);
+  const target = document.createElement('div'); target.style.width='240px'; target.style.height='120px'; target.style.margin='20px auto'; target.style.borderRadius='10px'; target.style.background='tomato'; target.style.display='grid'; target.style.placeItems='center'; target.style.fontSize='22px'; target.style.cursor='pointer'; target.textContent='Wait...'; wrap.appendChild(target);
+  let trials = [], stateR = {waiting:true,start:0};
+  function startTrial(){
+    target.style.background='tomato'; target.textContent='Wait...'; stateR.waiting=true;
+    const delay = 800 + Math.random()*2200;
+    setTimeout(()=>{ stateR.waiting=false; stateR.start=Date.now(); target.style.background='lime'; target.textContent='CLICK!'; }, delay);
+  }
+  target.addEventListener('click', ()=> {
+    if(stateR.waiting){ // early
+      trials.push(1000); startTrial();
+      return;
+    }
+    const rt = Date.now() - stateR.start;
+    trials.push(rt);
+    if(trials.length >= 7){
+      const sorted = trials.slice().sort((a,b)=>a-b);
+      const median = sorted[Math.floor(sorted.length/2)];
+      stopTimer(); awardAchievement('reaction_master','Quick Reflexes'); done({score: Math.max(0,1000-Median(trials)), time: median});
+      return;
+    }
+    startTrial();
+  });
+  startTimer(); startTrial();
+  function Median(arr){ const s = arr.slice().sort((a,b)=>a-b); return s[Math.floor(s.length/2)]; }
+}
+
+/* ---- Game: Typing Test ---- */
+function game_typing(container, done){
+  container.innerHTML = ''; stopTimer();
+  const passage = "The quick brown fox jumps over the lazy dog. Practice makes perfect. Code, test, repeat.";
+  const wrap = document.createElement('div'); wrap.style.width='100%'; container.appendChild(wrap);
+  const pEl = document.createElement('div'); pEl.className='small'; pEl.style.marginBottom='8px'; pEl.textContent = passage; wrap.appendChild(pEl);
+  const input = document.createElement('textarea'); input.style.width='100%'; input.style.height='120px'; input.style.borderRadius='8px'; wrap.appendChild(input);
+  const info = document.createElement('div'); info.className='small'; info.style.marginTop='8px'; info.textContent='Start typing to begin. '; wrap.appendChild(info);
+  let started=false, startT=0;
+  input.addEventListener('input', ()=>{
+    if(!started){ started=true; startT = Date.now(); startTimer(); }
+    const typed = input.value;
+    if(typed.length >= passage.length){
+      const duration = Date.now() - startT;
+      const words = passage.split(/\s+/).length;
+      const wpm = Math.round((words / (duration/1000)) * 60);
+      const correctChars = Array.from(passage).reduce((acc,ch,i)=> acc + (typed[i]===ch?1:0), 0);
+      const accuracy = Math.round((correctChars / passage.length) * 100);
+      stopTimer(); awardAchievement('typing_speed','Typing Sprinter'); done({score: wpm * accuracy, time: duration});
+    }
+  });
+}
+
+/* ---- Game: Flappy Bird (simple) ---- */
+function game_flappy(container, done){
+  container.innerHTML = ''; stopTimer();
+  const canvas = document.createElement('canvas'); canvas.width = Math.min(720, window.innerWidth-300); canvas.height = 420; container.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+  let bird = {x:80,y:200,vy:0};
+  const gravity = 0.6, jump = -10;
+  const pipes = [];
+  let tick = 0, score = 0;
+  function spawnPipe(){ const gap = 120; const top = 60 + Math.random()*180; pipes.push({x:canvas.width, top, gap}); }
+  function draw(){
+    ctx.fillStyle = '#06111a'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    // pipes
+    ctx.fillStyle = '#0f7'; pipes.forEach(p=> { ctx.fillRect(p.x,0,52,p.top); ctx.fillRect(p.x,p.top+p.gap,52,canvas.height); });
+    // bird
+    ctx.fillStyle='yellow'; ctx.fillRect(bird.x, bird.y, 24, 18);
+    // score
+    ctx.fillStyle='white'; ctx.fillText('Score: '+score, 10, 20);
+  }
+  function step(){
+    bird.vy += gravity; bird.y += bird.vy;
+    if(bird.y < 0) bird.y = 0;
+    if(bird.y > canvas.height) { clearInterval(tick); stopTimer(); alert('Crashed! Score: '+score); done({score, time: state.elapsed}); return; }
+    if(tick % 90 === 0) spawnPipe();
+    pipes.forEach(p=> p.x -= 2.6);
+    for(const p of pipes){
+      if(!p.scored && p.x + 52 < bird.x){ p.scored = true; score++; state.score = score; uiUpdate(); }
+      // collision
+      if(bird.x + 24 > p.x && bird.x < p.x + 52 && (bird.y < p.top || bird.y + 18 > p.top + p.gap)){ clearInterval(tick); stopTimer(); alert('Hit a pipe! Score: '+score); done({score, time: state.elapsed}); return; }
+    }
+    // cleanup pipes
+    while(pipes.length && pipes[0].x < -60) pipes.shift();
+    draw(); tick++;
+  }
+  function flap(){ bird.vy = jump; playTone(880,0.04); }
+  window.addEventListener('keydown', onKey);
+  canvas.addEventListener('click', flap);
+  function onKey(e){ if(e.code==='Space') flap(); }
+  startTimer(); tick = setInterval(step, 28);
+  setTimeout(()=>{ clearInterval(tick); window.removeEventListener('keydown', onKey); done({score, time: state.elapsed}); }, 180000);
+}
+
+/* --------------------------
+   Utility functions
+   -------------------------- */
+function rand(n){ return Math.floor(Math.random()*n); }
+function shuffle(a){ const arr = a.slice(); for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]] } return arr; }
+
+/* --------------------------
+   Small helpers: escape HTML done earlier
+   -------------------------- */
+
+/* --------------------------
+   Startup: select first game & ui updates
+   -------------------------- */
+selectGame(GAMES[0].id);
+uiUpdate();
+
+// ensure confetti canvas resizes
+resizeConfetti();
+
+/* --------------------------
+   End of main script
+   -------------------------- */
+
+</script>
+</body>
+</html>
