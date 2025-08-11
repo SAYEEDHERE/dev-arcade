@@ -6,65 +6,66 @@
 <title>Dev Arcade Ultimate — Mind Maze (Sayeed)</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='96'%3E%F0%9F%A7%A0%3C/text%3E%3C/svg%3E">
 <style>
-/* ===============================
-   Dev Arcade Ultimate — Hardcore UI
-   Single-file optimized — CSS
-   =============================== */
-
+/* ===========================
+   Dev Arcade Ultimate — single-file CSS
+   Neon arcade theme, polished UI
+   =========================== */
 :root{
-  --bg:#050814;
-  --panel:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-  --muted:#9fb3c8;
-  --accent1:#9b5cff;
+  --bg:#040615;
+  --accent1:#a04cff;
   --accent2:#00d4ff;
   --glass:rgba(255,255,255,0.03);
-  --neon1:rgba(155,92,255,0.14);
-  --neon2:rgba(0,212,255,0.12);
-  --radius:14px;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-  -webkit-font-smoothing:antialiased;
+  --muted:#9fb3c8;
+  --neon-shadow:0 18px 80px rgba(160,76,255,0.10);
+  --radius:12px;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
 }
-
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;background:
-  radial-gradient(800px 340px at 10% 10%, rgba(155,92,255,0.04), transparent 12%),
-  radial-gradient(600px 300px at 90% 90%, rgba(0,212,255,0.03), transparent 12%),
-  var(--bg); color:#e9f2fb;}
-.container{max-width:1280px;margin:18px auto;padding:18px;border-radius:18px;background:linear-gradient(180deg, rgba(255,255,255,0.012), rgba(255,255,255,0.008));box-shadow:0 18px 80px rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.02)}
+  radial-gradient(900px 400px at 10% 10%, rgba(160,76,255,0.03), transparent 12%),
+  radial-gradient(700px 350px at 90% 90%, rgba(0,212,255,0.02), transparent 12%),
+  var(--bg); color:#eaf3fb; -webkit-font-smoothing:antialiased;}
+.container{max-width:1200px;margin:18px auto;padding:18px;border-radius:18px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.006));box-shadow:0 18px 100px rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.02)}
 .header{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .brand{display:flex;gap:12px;align-items:center}
-.logo{width:72px;height:72px;border-radius:16px;background:linear-gradient(135deg,var(--accent1),var(--accent2));display:grid;place-items:center;font-weight:900;font-size:22px;color:white;box-shadow:0 8px 40px rgba(155,92,255,0.12)}
-.title h1{margin:0;font-size:20px}
+.logo{width:64px;height:64px;border-radius:14px;background:linear-gradient(135deg,var(--accent1),var(--accent2));display:grid;place-items:center;font-weight:900;font-size:20px;color:white;box-shadow:var(--neon-shadow)}
+.title h1{margin:0;font-size:18px}
 .title p{margin:0;color:var(--muted);font-size:13px}
-.header-right{display:flex;gap:8px;align-items:center}
-.btn{cursor:pointer;padding:10px 14px;border-radius:12px;background:linear-gradient(90deg,var(--accent1),var(--accent2));border:none;color:white;font-weight:800;display:inline-flex;gap:8px;align-items:center;box-shadow:0 10px 40px rgba(0,0,0,0.45)}
-.btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);box-shadow:none}
-.grid{display:grid;grid-template-columns:1fr 400px;gap:18px;margin-top:18px}
-.left{min-height:700px;padding:16px;border-radius:14px;background:linear-gradient(180deg, rgba(7,10,20,0.68), rgba(7,10,20,0.52));border:1px solid rgba(255,255,255,0.02)}
-.right{padding:16px;border-radius:14px;background:var(--panel);border:1px solid rgba(255,255,255,0.02)}
+.header-right{display:flex;gap:10px;align-items:center}
+
+.grid{display:grid;grid-template-columns:1fr 360px;gap:18px;margin-top:18px}
+.left{min-height:680px;padding:16px;border-radius:14px;background:linear-gradient(180deg, rgba(7,10,20,0.66), rgba(7,10,20,0.5));border:1px solid rgba(255,255,255,0.02)}
+.right{padding:16px;border-radius:14px;background:var(--glass);border:1px solid rgba(255,255,255,0.02)}
+
 .hud{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .stat{background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.02);font-weight:700}
 .controls{display:flex;gap:8px;align-items:center}
+.btn{cursor:pointer;padding:10px 14px;border-radius:12px;background:linear-gradient(90deg,var(--accent1),var(--accent2));border:none;color:white;font-weight:800;display:inline-flex;gap:8px;align-items:center;box-shadow:var(--neon-shadow)}
+.btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);box-shadow:none}
+.authChoice{display:flex;gap:8px}
+.authChoice .choice{padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);cursor:pointer;transition:transform .12s, box-shadow .12s;color:var(--muted)}
+.authChoice .choice.selected{background:linear-gradient(90deg,var(--accent1),var(--accent2));box-shadow:0 14px 60px rgba(160,76,255,0.12);color:#fff;transform:translateY(-4px)}
+
 .menu-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:12px}
-.card{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);cursor:pointer;display:flex;flex-direction:column;gap:8px;align-items:flex-start;transition:transform .18s, box-shadow .18s}
-.card:hover{transform:translateY(-8px);box-shadow:0 20px 80px rgba(0,0,0,0.5), 0 0 28px var(--neon1)}
-.card .thumb{width:100%;height:120px;border-radius:10px;background:linear-gradient(135deg,var(--accent1),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:28px;color:white}
-.card .meta{font-size:13px;color:var(--muted)}
-.stage{margin-top:16px;border-radius:12px;height:560px;display:flex;align-items:center;justify-content:center;overflow:auto;position:relative;padding:12px}
+.card{position:relative;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);cursor:pointer;display:flex;flex-direction:column;gap:8px;align-items:flex-start;transition:transform .18s, box-shadow .18s}
+.card:hover{transform:translateY(-8px);box-shadow:0 20px 80px rgba(0,0,0,0.5), 0 0 28px rgba(160,76,255,0.12)}
+.thumb{width:100%;height:120px;border-radius:10px;background:linear-gradient(135deg,var(--accent1),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:28px;color:white}
+.meta{font-size:13px;color:var(--muted)}
+.stage{margin-top:16px;border-radius:12px;height:560px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;padding:12px}
 .stageInner{width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column}
 .panel{padding:12px;border-radius:10px;background:linear-gradient(180deg,var(--glass),rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.02)}
 .small{font-size:13px;color:var(--muted)}
 .footer{display:flex;justify-content:space-between;align-items:center;margin-top:14px;color:var(--muted);font-size:13px}
 .iconBtn{display:inline-flex;gap:8px;align-items:center;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--muted);cursor:pointer}
 .icon{width:18px;height:18px;display:inline-block}
-.modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:linear-gradient(180deg,#071226,#08152a);padding:18px;border-radius:12px;z-index:1000;box-shadow:0 20px 120px rgba(0,0,0,0.9);border:1px solid rgba(255,255,255,0.03);max-width:1000px;width:calc(100% - 40px)}
-.modal h3{margin:0 0 8px 0}
+.modal-backdrop{position:fixed;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.65);display:grid;place-items:center;z-index:1600}
+.modal{background:linear-gradient(180deg,#071226,#08152a);padding:18px;border-radius:14px;z-index:1700;box-shadow:0 20px 120px rgba(0,0,0,0.9);border:1px solid rgba(255,255,255,0.03);max-width:1100px;width:calc(100% - 40px);max-height:92vh;overflow:auto;position:relative}
 .modal .close{position:absolute;right:12px;top:12px;cursor:pointer;color:var(--muted)}
-.kbd{background:rgba(255,255,255,0.02);padding:4px 6px;border-radius:6px;font-weight:800}
+.gameCanvas{width:100%;height:420px;border-radius:10px;background:#05061a;display:block;overflow:hidden}
+.authGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .inputNeon{display:block;width:100%;padding:12px 14px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.06);color:#fff;font-size:15px;outline:none;transition:box-shadow .18s, transform .08s}
 .inputNeon::placeholder{color:rgba(255,255,255,0.36)}
-.inputNeon:focus{box-shadow:0 6px 40px var(--neon1);transform:translateY(-2px)}
-.authGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.inputNeon:focus{box-shadow:0 6px 40px rgba(160,76,255,0.12);transform:translateY(-2px)}
 .leaderboard{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.02)}
 .leadItem{display:flex;align-items:center;gap:10px;padding:8px;border-radius:10px;transition:transform .15s}
 .leadItem:hover{transform:translateX(6px)}
@@ -76,22 +77,26 @@ html,body{height:100%;margin:0;background:
 </head>
 <body>
 <div class="container" id="app">
-  <canvas id="confettiCanvas" style="position:fixed;left:0;top:0;pointer-events:none;z-index:60"></canvas>
+  <!-- Confetti canvas -->
+  <canvas id="confettiCanvas" style="position:fixed;left:0;top:0;pointer-events:none;z-index:2100"></canvas>
 
   <div class="header">
     <div class="brand">
       <div class="logo">MM</div>
       <div class="title">
         <h1>Dev Arcade Ultimate — The Mind Maze</h1>
-        <p class="small">Single-file arcade — Hardcore edition by <strong>Sayeed</strong></p>
+        <p class="small">Single-file arcade — Built by <strong>Sayeed</strong></p>
       </div>
     </div>
 
     <div class="header-right">
       <div id="userArea" class="small">Not signed in</div>
-      <button class="btn ghost" id="authBtn">Sign in / Register</button>
-      <button class="btn" id="guestBtn">Play as Guest</button>
-      <button class="btn" id="muteBtn">Mute</button>
+      <button class="btn ghost" id="authBtn" title="Open Sign-in/Register modal">Sign in / Register</button>
+      <div class="authChoice" aria-hidden>
+        <div class="choice selected" id="choiceEmail" tabindex="0">Email</div>
+        <div class="choice" id="choiceGuest" tabindex="0">Guest</div>
+      </div>
+      <button class="btn" id="muteBtn" title="Mute / Unmute music">Mute</button>
     </div>
   </div>
 
@@ -120,14 +125,16 @@ html,body{height:100%;margin:0;background:
           </div>
         </div>
 
-        <div class="menu-grid" id="menuGrid"></div>
+        <div class="menu-grid" id="menuGrid">
+          <!-- cards injected by JS -->
+        </div>
       </div>
 
       <div class="stage panel" id="stage">
         <div class="stageInner" id="stageInner">
           <div style="text-align:center;color:var(--muted)">
-            <h2>Welcome to the Ultimate Dev Arcade</h2>
-            <p class="small">Sign in (email) or play as Guest. Save local scores or publish to live leaderboard (authenticated users only).</p>
+            <h2>Welcome to Dev Arcade Ultimate</h2>
+            <p class="small">Click a game card to launch it in a focused popup (no scrolling). Sign in to publish scores to the global leaderboard.</p>
             <div style="height:12px"></div>
             <div style="display:flex;gap:8px;justify-content:center">
               <button class="btn" id="startDefault">Quick Run</button>
@@ -188,20 +195,22 @@ html,body{height:100%;margin:0;background:
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
-/* ===============================
-  Dev Arcade — Hardcore single file JS
-  - Anonymous guest + email/password
-  - Convert guest to permanent account helper
-  - Sexy live leaderboard UI
-  - "i" Info per game + how-to modal
-  - Firestore pending queue + sync
-  - Polished visuals + sounds
-  =============================== */
+/* ====================================================
+   Dev Arcade Ultimate — Single-file JS
+   Implements:
+   - Modal popups for games (no scrolling)
+   - Auth modal with Email/Guest + convert flow
+   - Background music + sound fx
+   - Live leaderboards (Firestore) with pending queue sync
+   - rAF-based games in modal canvas with cleanup
+   - Debounced resize, single keyboard listener when modal open
+   - Performance best practices & cleanup
+   ==================================================== */
 
-/* -------------------------
-   YOUR FIREBASE CONFIG (client-side)
-   Keep this; web API keys are expected on client.
-   ------------------------- */
+/* ---------------------------
+   FIREBASE CONFIG (use yours)
+   You already provided this config earlier — kept here.
+   --------------------------- */
 const firebaseConfig = {
   apiKey: "AIzaSyDzNwzn3KzTBErJLf_I8aogzGyaZNxtTSY",
   authDomain: "dev-arcade-sayeed.firebaseapp.com",
@@ -215,35 +224,101 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-/* -------------------------
-   Utility + UI helpers
-   ------------------------- */
+/* ---------------------------
+   Helpers & small utils
+   --------------------------- */
 const $ = s => document.querySelector(s);
 const $$ = s => Array.from(document.querySelectorAll(s));
 const el = id => document.getElementById(id);
 
-const confettiCanvas = el('confettiCanvas'), confettiCtx = confettiCanvas.getContext('2d');
-function resizeConfetti(){ confettiCanvas.width = window.innerWidth; confettiCanvas.height = window.innerHeight; }
-window.addEventListener('resize', resizeConfetti); resizeConfetti();
-function launchConfetti(n=100){ const pieces=[]; for(let i=0;i<n;i++) pieces.push({x:Math.random()*confettiCanvas.width,y:-Math.random()*confettiCanvas.height,vx:(Math.random()-0.5)*8,vy:2+Math.random()*6,size:4+Math.random()*12,rot:Math.random()*360,color:`hsl(${Math.random()*360} 80% 60%)`}); let anim; function draw(){ confettiCtx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height); for(const p of pieces){ p.x+=p.vx; p.y+=p.vy; p.vy+=0.08; p.rot+=0.05; confettiCtx.save(); confettiCtx.translate(p.x,p.y); confettiCtx.rotate(p.rot); confettiCtx.fillStyle=p.color; confettiCtx.fillRect(-p.size/2,-p.size/2,p.size,p.size*0.6); confettiCtx.restore(); } if(pieces.some(p=>p.y < confettiCanvas.height+60)) requestAnimationFrame(draw); else confettiCtx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height); } draw(); }
+function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function debounce(fn, delay=120){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), delay); }; }
+function msToTime(ms){ const s=Math.floor(ms/1000), m=Math.floor(s/60), sec=s%60; return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`; }
+function rand(n){ return Math.floor(Math.random()*n); }
+function shuffle(a){ const arr=a.slice(); for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]] } return arr; }
 
+/* ---------------------------
+   Confetti canvas (small)
+   --------------------------- */
+const confettiCanvas = el('confettiCanvas'), confettiCtx = confettiCanvas.getContext('2d');
+function resizeConfetti(){ confettiCanvas.width = innerWidth; confettiCanvas.height = innerHeight; }
+window.addEventListener('resize', debounce(resizeConfetti, 150));
+resizeConfetti();
+function launchConfetti(n=80){
+  const pieces = [];
+  for(let i=0;i<n;i++) pieces.push({x:Math.random()*confettiCanvas.width,y:-Math.random()*confettiCanvas.height,vx:(Math.random()-0.5)*6,vy:2+Math.random()*5,size:4+Math.random()*10,rot:Math.random()*360,color:`hsl(${Math.random()*360} 80% 60%)`});
+  let running = true;
+  function draw(){
+    confettiCtx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
+    for(const p of pieces){
+      p.x += p.vx; p.y += p.vy; p.vy += 0.06; p.rot += 0.05;
+      confettiCtx.save(); confettiCtx.translate(p.x,p.y); confettiCtx.rotate(p.rot);
+      confettiCtx.fillStyle = p.color; confettiCtx.fillRect(-p.size/2,-p.size/2,p.size,p.size*0.6);
+      confettiCtx.restore();
+    }
+    if(pieces.some(p=>p.y < confettiCanvas.height+60) && running) requestAnimationFrame(draw);
+    else confettiCtx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
+  }
+  draw();
+}
+
+/* ---------------------------
+   Audio: background music + small fx
+   - Background is a tiny oscillator loop (so no external file)
+   - Play resumes after a user gesture
+   --------------------------- */
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
-const audioCtx = new AudioCtx();
+let audioCtx = null;
+let bgGain = null, bgOsc = null;
 let globalMute = false;
-function playTone(freq=440,dur=0.06,type='sine',vol=0.06){
+function initAudio(){
+  if(audioCtx) return;
+  try{
+    audioCtx = new AudioCtx();
+    bgGain = audioCtx.createGain(); bgGain.gain.value = 0.05; bgGain.connect(audioCtx.destination);
+    // create a low, detuned saw-style background using 2 oscillators
+    bgOsc = audioCtx.createOscillator(); bgOsc.type = 'sawtooth'; bgOsc.frequency.value = 110;
+    const o2 = audioCtx.createOscillator(); o2.type='sine'; o2.frequency.value = 220; o2.detune.value = -120;
+    const mix = audioCtx.createGain(); mix.gain.value = 0.6; mix.connect(bgGain);
+    bgOsc.connect(mix); o2.connect(mix);
+    bgOsc.start(); o2.start();
+    // subtle filter
+    const f = audioCtx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=1000; mix.connect(f); f.connect(bgGain);
+  }catch(e){
+    console.warn('Audio init failed', e);
+  }
+}
+function setMute(v){
+  globalMute = v;
+  if(bgGain) bgGain.gain.value = v ? 0 : 0.05;
+  el('muteBtn').textContent = v ? 'Unmute' : 'Mute';
+}
+function playSFX(freq=440, dur=0.06, type='sine', vol=0.08){
   if(globalMute) return;
+  if(!audioCtx) initAudio();
   try{
     const o = audioCtx.createOscillator();
     const g = audioCtx.createGain();
     o.type = type; o.frequency.value = freq; g.gain.value = vol;
-    o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + dur);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); o.stop(audioCtx.currentTime + dur);
   }catch(e){}
 }
-el('muteBtn').addEventListener('click', ()=>{ globalMute = !globalMute; el('muteBtn').textContent = globalMute ? 'Unmute' : 'Mute'; });
+el('muteBtn').addEventListener('click', ()=>{
+  // ensure audio started on user gesture
+  if(!audioCtx) initAudio();
+  setMute(!globalMute);
+});
 
-/* -------------------------
-   App state
-   ------------------------- */
+/* attempt to resume audio on first user gesture */
+document.addEventListener('click', function _once(){
+  if(!audioCtx) initAudio();
+  document.removeEventListener('click', _once);
+});
+
+/* ---------------------------
+   State
+   --------------------------- */
 let state = {
   currentGameId: null,
   running: false,
@@ -255,24 +330,110 @@ let state = {
   localScores: JSON.parse(localStorage.getItem('devarcade_local')||'{}'),
   pending: JSON.parse(localStorage.getItem('devarcade_pending')||'{}'),
   achievements: JSON.parse(localStorage.getItem('devarcade_ach')||'{}'),
-  lastLeaderboard: null
+  activeModal: null, // reference to modal cleanup
+  keyboardHandler: null
 };
 
 /* UI refs */
 const menuGrid = el('menuGrid'), stageInner = el('stageInner'), gameName = el('gameName');
 const scoreEl = el('score'), timeEl = el('time'), liveLeaderboard = el('liveLeaderboard'), localBoard = el('localBoard');
-const authBtn = el('authBtn'), userArea = el('userArea'), howBtn = el('howBtn'), playAll = el('playAll');
-const exportBtn = el('exportBtn'), importBtn = el('importBtn'), guestBtn = el('guestBtn'), globalInfo = el('globalInfo');
+const authBtn = el('authBtn'), userArea = el('userArea'), howBtn = el('howBtn'), leaderBtn = el('leaderBtn'), startDefault = el('startDefault');
+const exportBtn = el('exportBtn'), importBtn = el('importBtn'), playAll = el('playAll'), globalInfo = el('globalInfo');
+const choiceEmail = el('choiceEmail'), choiceGuest = el('choiceGuest');
 
-/* Small helpers */
-const msToTime = ms => { const s = Math.floor(ms/1000), m = Math.floor(s/60), sec = s%60; return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`; };
-function uiUpdate(){ gameName.textContent = state.currentGameId ? (GAMES.find(g=>g.id===state.currentGameId).name) : '—'; scoreEl.textContent = state.score; timeEl.textContent = msToTime(state.elapsed); renderLocalBoard(); renderAchievements(); }
+/* UI update helpers */
+function uiUpdate(){
+  gameName.textContent = state.currentGameId ? (GAMES.find(g=>g.id===state.currentGameId).name) : '—';
+  scoreEl.textContent = state.score;
+  timeEl.textContent = msToTime(state.elapsed);
+  renderLocalBoard();
+  renderAchievements();
+}
+
+/* timer */
 function startTimer(){ state.startTime = Date.now(); state.timer = setInterval(()=>{ state.elapsed = Date.now() - state.startTime; uiUpdate(); }, 200); }
 function stopTimer(){ if(state.timer){ clearInterval(state.timer); state.timer = null; } }
 
-/* -------------------------
-   Local persistence helpers
-   ------------------------- */
+/* ---------------------------
+   Firebase pending queue sync (batched)
+   --------------------------- */
+async function syncPending(){
+  if(!navigator.onLine) return;
+  if(!auth.currentUser) return;
+  const pending = JSON.parse(localStorage.getItem('devarcade_pending')||'{}');
+  if(!pending) return;
+  for(const gameId of Object.keys(pending)){
+    const arr = pending[gameId];
+    if(!arr || !arr.length) continue;
+    // batch writes in chunks
+    for(const rec of arr){
+      try{
+        await db.collection('leaderboards').doc(gameId).collection('scores').add({
+          uid: auth.currentUser.uid,
+          name: rec.name,
+          score: Number(rec.score),
+          time: Number(rec.time||0),
+          ts: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      }catch(e){
+        console.warn('sync failed', e);
+        return; // stop on first failure to retry later
+      }
+    }
+  }
+  localStorage.removeItem('devarcade_pending');
+  state.pending = {};
+  uiUpdate();
+}
+
+/* subscribe to online event to sync pending automatically */
+window.addEventListener('online', () => {
+  syncPending();
+});
+
+/* ---------------------------
+   Leaderboards: real-time subscription
+   - Updates shown with animated list
+   --------------------------- */
+let currentUnsub = null;
+function subscribeLiveLeaderboard(gameId){
+  if(currentUnsub) try{ currentUnsub(); }catch(e){}
+  liveLeaderboard.innerHTML = '<div class="small">Loading live leaderboard...</div>';
+  try{
+    const ref = db.collection('leaderboards').doc(gameId).collection('scores').orderBy('score','desc').limit(15);
+    currentUnsub = ref.onSnapshot(snapshot=>{
+      const rows = [];
+      snapshot.forEach(doc=>{
+        const d = doc.data();
+        rows.push({name:d.name,score:d.score,time:d.time,ts:d.ts});
+      });
+      if(rows.length === 0){ liveLeaderboard.innerHTML = '<div class="small">No scores yet — be the first!</div>'; return; }
+      // render
+      liveLeaderboard.innerHTML = '';
+      rows.forEach((r, i)=>{
+        const item = document.createElement('div'); item.className = 'leadItem';
+        const initials = (r.name||'P').split(' ').map(s=>s[0]).slice(0,2).join('').toUpperCase();
+        item.innerHTML = `<div class="avatar">${escapeHtml(initials)}</div>
+                          <div style="min-width:120px"><strong>${escapeHtml(r.name||'Player')}</strong><div class="small" style="color:var(--muted)">${r.time ? msToTime(r.time) : '—'}</div></div>
+                          <div class="lb-score" style="font-size:16px">${r.score}</div>`;
+        liveLeaderboard.appendChild(item);
+        // animate insert
+        item.style.transform = 'translateX(-20px)'; item.style.opacity = '0';
+        requestAnimationFrame(()=>{ item.style.transition = 'transform .28s, opacity .28s'; item.style.transform = 'translateX(0)'; item.style.opacity = '1'; });
+      });
+    }, err=>{
+      console.error('snapshot err', err);
+      liveLeaderboard.innerHTML = '<div class="small">Leaderboards unavailable — check rules.</div>';
+    });
+  }catch(e){
+    console.error(e);
+    liveLeaderboard.innerHTML = '<div class="small">Live board error</div>';
+  }
+}
+
+/* ---------------------------
+   Local leaderboard helpers (browser)
+   --------------------------- */
 function saveLocalScore(gameId, name, score, time){
   const key = 'devarcade_local';
   const data = JSON.parse(localStorage.getItem(key)||'{}');
@@ -291,352 +452,8 @@ function addPending(gameId, name, score, time){
   localStorage.setItem(key, JSON.stringify(data));
   state.pending = data;
 }
-async function syncPending(){
-  if(!navigator.onLine) return;
-  if(!auth.currentUser) return;
-  const data = JSON.parse(localStorage.getItem('devarcade_pending')||'{}');
-  if(!data) return;
-  for(const gameId of Object.keys(data)){
-    for(const rec of data[gameId]){
-      try{
-        await db.collection('leaderboards').doc(gameId).collection('scores').add({
-          uid: auth.currentUser.uid,
-          name: rec.name,
-          score: Number(rec.score),
-          time: Number(rec.time||0),
-          ts: firebase.firestore.FieldValue.serverTimestamp()
-        });
-      } catch(e){
-        console.warn('sync pending failed', e);
-        return;
-      }
-    }
-  }
-  localStorage.removeItem('devarcade_pending');
-  state.pending = {};
-  uiUpdate();
-}
 
-/* -------------------------
-   Leaderboard subscription + sexy UI rendering
-   ------------------------- */
-let currentUnsub = null;
-function renderSexyLeaderSnapshot(snapshot){
-  const rows = [];
-  snapshot.forEach(doc=>{
-    const d = doc.data();
-    // nice avatar initials
-    const initials = (d.name||'Player').split(' ').map(s=>s[0]).slice(0,2).join('').toUpperCase();
-    rows.push({name:d.name,score:d.score,time:d.time,ts:d.ts,initials});
-  });
-  // animated HTML
-  if(rows.length===0){ liveLeaderboard.innerHTML = '<div class="small">No scores yet — be first!</div>'; return; }
-  liveLeaderboard.innerHTML = rows.map((r,ix)=>`
-    <div class="leadItem" style="background:linear-gradient(90deg, rgba(255,255,255,0.01), transparent); margin-bottom:6px">
-      <div class="avatar">${r.initials}</div>
-      <div style="min-width:120px"><strong style="font-weight:800">${escapeHtml(r.name||'Player')}</strong><div class="small" style="color:var(--muted)">${r.time ? msToTime(r.time) : '—'}</div></div>
-      <div class="lb-score" style="font-size:16px">${r.score}</div>
-    </div>
-  `).join('');
-}
-
-function subscribeLiveLeaderboard(gameId){
-  if(currentUnsub) try{ currentUnsub(); }catch(e){}
-  liveLeaderboard.innerHTML = '<div class="small">Loading live leaderboard...</div>';
-  try{
-    const ref = db.collection('leaderboards').doc(gameId).collection('scores').orderBy('score','desc').limit(15);
-    currentUnsub = ref.onSnapshot(snapshot=>{
-      renderSexyLeaderSnapshot(snapshot);
-    }, err=>{
-      console.error('snapshot err', err);
-      liveLeaderboard.innerHTML = '<div class="small">Leaderboards unavailable — check Firestore rules.</div>';
-    });
-  }catch(e){
-    console.error(e);
-    liveLeaderboard.innerHTML = '<div class="small">Live board error</div>';
-  }
-}
-
-/* -------------------------
-   Escape helper
-   ------------------------- */
-function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-
-/* -------------------------
-   GAMES registry with info + i (info) button
-   ------------------------- */
-const GAMES = [
-  { id:'memory', name:'Memory Match', section:'Puzzles', thumb:'🧠', desc:'Flip matching pairs quickly.', fn: game_memory, how: 'Flip cards to find matching pairs. Fewer moves + faster time = higher score.' },
-  { id:'puzzle', name:'Slide Puzzle', section:'Puzzles', thumb:'🧩', desc:'Arrange tiles to reconstruct the image.', fn: game_puzzle, how: 'Rearrange tiles to complete the picture. Click tiles to swap.' },
-  { id:'quiz', name:'Quick Quiz', section:'Competitive', thumb:'❓', desc:'5 rapid programming questions.', fn: game_quiz, how: 'Answer 5 quick questions. Speed gives bonus points.' },
-  { id:'snake', name:'Snake', section:'Classics', thumb:'🐍', desc:'Grow by eating dots. Avoid collisions.', fn: game_snake, how: 'Use arrow keys to move. Eat apples to grow.' },
-  { id:'ttt', name:'Tic-Tac-Toe', section:'Classics', thumb:'⭕️', desc:'Local 2-player game.', fn: game_ttt, how: 'Hotseat 2-player Tic-Tac-Toe. Get 3 in a row to win.' },
-  { id:'mines', name:'Minesweeper', section:'Puzzles', thumb:'💣', desc:'Classic Minesweeper.', fn: game_mines, how: 'Reveal tiles, avoid mines. Right-click to flag.' },
-  { id:'2048', name:'2048', section:'Puzzles', thumb:'🔢', desc:'Combine tiles to reach 2048.', fn: game_2048, how: 'Use arrows to slide tiles. Combine equal tiles.' },
-  { id:'reaction', name:'Reaction Test', section:'Competitive', thumb:'⚡', desc:'How fast are you?', fn: game_reaction, how: 'Wait for the signal and click/tap as fast as possible.' },
-  { id:'typing', name:'Typing Test', section:'Competitive', thumb:'⌨️', desc:'WPM & accuracy test.', fn: game_typing, how: 'Type the passage as fast and accurately as possible.' },
-  { id:'flappy', name:'Flappy', section:'Arcade', thumb:'🐦', desc:'Tap to fly through gaps.', fn: game_flappy, how: 'Tap or press Space to flap. Pass pipes to score.' }
-];
-
-function buildMenu(){
-  menuGrid.innerHTML = '';
-  const sections = {};
-  GAMES.forEach(g=> { sections[g.section] = sections[g.section] || []; sections[g.section].push(g); });
-  for(const section of Object.keys(sections)){
-    const header = document.createElement('div'); header.innerHTML = `<div style="font-weight:900;margin-top:4px">${section}</div><div class="small" style="margin-bottom:6px">${sections[section].length} games</div>`;
-    menuGrid.appendChild(header);
-    sections[section].forEach(g=>{
-      const card = document.createElement('div'); card.className='card'; card.dataset.id=g.id;
-      card.innerHTML = `<div class="thumb">${g.thumb}</div><div style="display:flex;justify-content:space-between;width:100%"><div style="font-weight:900">${g.name}</div><div class="small">${g.section}</div></div><div class="meta">${g.desc}</div>`;
-      card.addEventListener('click', ()=> selectGame(g.id));
-      // right-top info icon
-      const info = document.createElement('div'); info.style.position='absolute'; info.style.margin='10px'; info.style.right='10px';
-      menuGrid.appendChild(card);
-      menuGrid.appendChild(document.createElement('div')); // small spacer to keep layout consistent
-      card.addEventListener('contextmenu', e=> { e.preventDefault(); showHow(g); });
-    });
-  }
-}
-buildMenu();
-
-/* search */
-$('#search').addEventListener('input', e => {
-  const q = e.target.value.trim().toLowerCase();
-  if(!q){ buildMenu(); return; }
-  const filtered = GAMES.filter(g=> g.name.toLowerCase().includes(q) || g.desc.toLowerCase().includes(q));
-  menuGrid.innerHTML = '';
-  filtered.forEach(g=>{
-    const card = document.createElement('div'); card.className='card'; card.dataset.id=g.id;
-    card.innerHTML = `<div class="thumb">${g.thumb}</div><div style="display:flex;justify-content:space-between;width:100%"><div style="font-weight:900">${g.name}</div><div class="small">${g.section}</div></div><div class="meta">${g.desc}</div>`;
-    card.addEventListener('click', ()=> selectGame(g.id));
-    menuGrid.appendChild(card);
-  });
-});
-
-/* -------------------------
-   Select / Start / Finish flow
-   ------------------------- */
-function selectGame(id){
-  const g = GAMES.find(x=>x.id===id);
-  if(!g) return;
-  state.currentGameId = id; state.score = 0; state.moves = 0; state.elapsed = 0; uiUpdate();
-  $$('.card').forEach(c=> c.style.outline = (c.dataset.id===id) ? '2px solid rgba(155,92,255,0.25)' : 'none');
-  stageInner.innerHTML = `<div style="text-align:center;width:100%"><h3 style="margin:0">${g.name}</h3><p class="small">${g.desc}</p><div style="height:12px"></div><div style="display:flex;gap:8px;justify-content:center"><button class="btn" id="playBtn">Play</button><button class="btn ghost" id="howPlay">How</button><button class="btn ghost" id="liveBtn">Live Board</button></div></div>`;
-  document.getElementById('playBtn').addEventListener('click', ()=> startGame(id));
-  document.getElementById('howPlay').addEventListener('click', ()=> showHow(g));
-  document.getElementById('liveBtn').addEventListener('click', ()=> { subscribeLiveLeaderboard(id); alert('Live leaderboard updated on the right'); });
-  subscribeLiveLeaderboard(id);
-}
-
-async function startGame(id){
-  const g = GAMES.find(x=>x.id===id);
-  if(!g) return;
-  state.score = 0; state.moves = 0; state.elapsed = 0; uiUpdate();
-  try{
-    await g.fn(stageInner, async (result) => {
-      state.score = result.score || state.score; state.elapsed = result.time || state.elapsed; stopTimer(); uiUpdate();
-      stageInner.innerHTML = `<div style="text-align:center"><h3>Finished: ${g.name}</h3><p class="small">Score: <strong>${state.score}</strong> • Time: ${msToTime(state.elapsed)}</p><div style="height:10px"></div><div style="display:flex;gap:8px;justify-content:center"><button class="btn" id="saveScore">Save Score</button><button class="btn ghost" id="again">Play Again</button></div></div>`;
-      document.getElementById('again').addEventListener('click', ()=> startGame(id));
-      document.getElementById('saveScore').addEventListener('click', async ()=>{
-        const user = auth.currentUser;
-        let displayName;
-        if(user){
-          displayName = user.displayName || (user.email ? user.email : (user.isAnonymous ? ('Guest-'+user.uid.slice(0,6)) : 'Player'));
-        } else {
-          displayName = prompt('Enter name to save locally:', 'Guest') || 'Guest';
-        }
-        saveLocalScore(id, displayName, state.score, state.elapsed);
-        if(user){
-          try{
-            await db.collection('leaderboards').doc(id).collection('scores').add({
-              uid: user.uid,
-              name: displayName,
-              score: Number(state.score),
-              time: Number(state.elapsed),
-              ts: firebase.firestore.FieldValue.serverTimestamp()
-            });
-            alert('Score published to live leaderboard!');
-            launchConfetti(90);
-          }catch(e){
-            console.warn('publish failed', e);
-            addPending(id, displayName, state.score, state.elapsed);
-            alert('Publish failed (offline or rules). Saved locally & queued.');
-          }
-        }else{
-          addPending(id, displayName, state.score, state.elapsed);
-          if(confirm('Sign in to publish this score to the global leaderboard?')) openAuthModal();
-          else alert('Saved locally. Sign in later to publish.');
-        }
-      });
-    });
-  }catch(e){
-    console.error('game error', e);
-    stageInner.innerHTML = `<div style="text-align:center;color:red">Game error — check console</div>`;
-  }
-}
-
-/* -------------------------
-   AUTH FLOW: Email/password + anonymous + convert guest
-   - Fixed input color/placeholder issues
-   ------------------------- */
-
-auth.onAuthStateChanged(async user=>{
-  if(user){
-    const name = user.displayName || (user.email ? user.email : (user.isAnonymous ? 'Guest-'+user.uid.slice(0,6) : 'User'));
-    userArea.innerHTML = `<strong>${escapeHtml(name)}</strong>`;
-    authBtn.textContent = 'Sign out';
-    // try sync
-    await syncPending();
-  } else {
-    userArea.textContent = 'Not signed in';
-    authBtn.textContent = 'Sign in / Register';
-  }
-});
-
-authBtn.addEventListener('click', ()=>{
-  if(auth.currentUser) {
-    if(confirm('Sign out?')) auth.signOut();
-  } else openAuthModal();
-});
-
-guestBtn.addEventListener('click', async ()=>{
-  try{
-    await auth.signInAnonymously();
-    alert('Signed in as guest. You can publish scores while anonymous. To keep them, convert to an account from your profile (Auth modal).');
-  }catch(e){ alert('Guest sign-in failed: '+e.message); }
-});
-
-/* Auth modal */
-function openAuthModal(){
-  const m = document.createElement('div'); m.className = 'modal';
-  m.innerHTML = `
-    <div class="close">✕</div>
-    <h3>Sign in or Register</h3>
-    <div style="display:flex;gap:8px;margin-top:8px">
-      <div style="flex:1">
-        <input id="emailField" class="inputNeon" placeholder="Email (you@example.com)" type="email" />
-        <input id="passField" class="inputNeon" placeholder="Password (min 6 chars)" type="password" style="margin-top:8px" />
-        <div style="display:flex;gap:8px;margin-top:10px">
-          <button class="btn" id="loginBtn">Login</button>
-          <button class="btn ghost" id="signupBtn">Register</button>
-          <button class="btn ghost" id="anonBtn">Play as Guest</button>
-        </div>
-        <div style="margin-top:8px" class="small">Tip: Play as Guest to try quickly. Convert guest to email later to keep scores.</div>
-      </div>
-      <div style="width:220px;padding-left:12px;border-left:1px dashed rgba(255,255,255,0.03)">
-        <div style="font-weight:900">Guest conversion</div>
-        <div class="small" style="margin-top:6px">If you're playing as Guest (anonymous), you can convert the account to an email/password account — this keeps your UID and scores linked.</div>
-        <div style="height:12px"></div>
-        <button class="btn" id="convertBtn">Convert Guest → Email</button>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(m);
-  m.querySelector('.close').addEventListener('click', ()=> m.remove());
-
-  const emailField = m.querySelector('#emailField'), passField = m.querySelector('#passField');
-  // ensure input visibility
-  emailField.style.color = '#fff'; passField.style.color = '#fff';
-
-  m.querySelector('#signupBtn').addEventListener('click', async ()=>{
-    const email = emailField.value.trim(), pass = passField.value;
-    if(!email || !pass) return alert('Enter email & password.');
-    try{
-      const cred = await auth.createUserWithEmailAndPassword(email, pass);
-      // update displayName with email prefix
-      try{ await cred.user.updateProfile({displayName: email.split('@')[0]}); }catch(e){}
-      m.remove(); alert('Registered & signed in.');
-    }catch(e){ alert('Register failed: '+e.message); }
-  });
-
-  m.querySelector('#loginBtn').addEventListener('click', async ()=>{
-    const email = emailField.value.trim(), pass = passField.value;
-    if(!email || !pass) return alert('Enter email & password.');
-    try{ await auth.signInWithEmailAndPassword(email, pass); m.remove(); }catch(e){ alert('Login failed: '+e.message); }
-  });
-
-  m.querySelector('#anonBtn').addEventListener('click', async ()=>{
-    try{ await auth.signInAnonymously(); m.remove(); alert('Signed in as guest. Convert your account later to keep scores.'); }catch(e){ alert('Guest sign-in failed: '+e.message); }
-  });
-
-  m.querySelector('#convertBtn').addEventListener('click', async ()=>{
-    // Convert anonymous to permanent via linking credential
-    const user = auth.currentUser;
-    if(!user) return alert('No authenticated user. Sign in as guest first.');
-    if(!user.isAnonymous) return alert('You are not a guest account.');
-    const email = prompt('Enter email to convert this Guest account to:', '');
-    if(!email) return;
-    const pass = prompt('Choose a password (min 6 chars):', '');
-    if(!pass) return;
-    const credential = firebase.auth.EmailAuthProvider.credential(email, pass);
-    try{
-      await user.linkWithCredential(credential);
-      // optionally set displayName
-      try { await user.updateProfile({displayName: email.split('@')[0]}); } catch(e){}
-      alert('Guest account converted to email account. Your UID and scores are preserved.');
-      m.remove();
-    }catch(e){
-      alert('Conversion failed: '+e.message);
-    }
-  });
-}
-
-/* -------------------------
-   How / Info / Export / Import
-   ------------------------- */
-howBtn.addEventListener('click', ()=> {
-  const g = GAMES.find(x=>x.id===state.currentGameId);
-  if(!g) return alert('Select a game first.');
-  showHow(g);
-});
-globalInfo.addEventListener('click', ()=> {
-  showModal(`<h3>About Dev Arcade Ultimate</h3>
-    <p class="small">This single-file arcade supports Email sign-in + Guest play (anonymous), live Firestore leaderboards, offline queueing & sync, achievements, and multiple mini-games with fun UX polish.</p>
-    <p class="small" style="margin-top:8px">Controls: keyboard & touch supported. Save scores after finishing each run. Convert guest to email to retain scores.</p>`);
-});
-exportBtn.addEventListener('click', ()=>{
-  const data = localStorage.getItem('devarcade_local') || '{}';
-  const blob = new Blob([data], {type:'application/json'}); const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download = 'devarcade-local.json'; a.click(); URL.revokeObjectURL(url);
-});
-importBtn.addEventListener('click', ()=>{
-  const inp = document.createElement('input'); inp.type='file'; inp.accept='.json';
-  inp.addEventListener('change', e=>{
-    const f = e.target.files[0]; if(!f) return;
-    const r = new FileReader();
-    r.onload = ()=> {
-      try{
-        const obj = JSON.parse(r.result);
-        localStorage.setItem('devarcade_local', JSON.stringify(obj));
-        state.localScores = obj;
-        alert('Imported local scores.');
-        uiUpdate();
-      }catch(e){ alert('Invalid file'); }
-    };
-    r.readAsText(f);
-  });
-  inp.click();
-});
-function showHow(game){
-  showModal(`<h3>How to play — ${game.name}</h3><p class="small">${escapeHtml(game.how || 'Use controls.')}</p><div style="height:8px"></div><div class="small">Tips: save scores after finishing. Click the leaderboard to follow live updates.</div>`);
-}
-function showModal(html){
-  const m = document.createElement('div'); m.className='modal'; m.innerHTML = `<div class="close">✕</div>${html}`; document.body.appendChild(m);
-  m.querySelector('.close').addEventListener('click', ()=> m.remove());
-  return m;
-}
-
-/* Achievements */
-function awardAchievement(key, text){
-  if(state.achievements[key]) return;
-  state.achievements[key] = {text, when: Date.now()};
-  localStorage.setItem('devarcade_ach', JSON.stringify(state.achievements));
-  renderAchievements();
-  showModal(`<h3>Achievement unlocked</h3><p class="small">${escapeHtml(text)}</p>`);
-}
-function renderAchievements(){ achList.innerHTML = ''; const keys = Object.keys(state.achievements || {}); if(keys.length===0) achList.innerHTML = '<li style="color:var(--muted)">No achievements yet</li>'; else keys.forEach(k=>{ const v = state.achievements[k]; const li = document.createElement('li'); li.style.color='var(--muted)'; li.textContent = `${v.text} • ${new Date(v.when).toLocaleString()}`; achList.appendChild(li); }); }
-
-/* Local leaderboard render */
+/* render local board */
 function renderLocalBoard(){
   localBoard.innerHTML = '';
   const data = JSON.parse(localStorage.getItem('devarcade_local')||'{}');
@@ -647,339 +464,688 @@ function renderLocalBoard(){
   });
 }
 
-/* -------------------------
-   GAMES implementations (kept compact & robust)
-   Each game calls done({score, time})
-   ------------------------- */
+/* ---------------------------
+   Achievements simple system
+   --------------------------- */
+function awardAchievement(key, text){
+  if(state.achievements[key]) return;
+  state.achievements[key] = {text, when: Date.now()};
+  localStorage.setItem('devarcade_ach', JSON.stringify(state.achievements));
+  renderAchievements();
+  showModal(`<h3>Achievement unlocked</h3><p class="small">${escapeHtml(text)}</p>`);
+}
+function renderAchievements(){
+  const achList = el('achList');
+  achList.innerHTML = '';
+  const keys = Object.keys(state.achievements || {});
+  if(keys.length===0) achList.innerHTML = '<li style="color:var(--muted)">No achievements yet</li>';
+  else keys.forEach(k=>{
+    const v = state.achievements[k];
+    const li = document.createElement('li'); li.style.color='var(--muted)'; li.textContent = `${v.text} • ${new Date(v.when).toLocaleString()}`; achList.appendChild(li);
+  });
+}
 
-/* Memory Match */
-function game_memory(container, done){
-  container.innerHTML = ''; stopTimer();
+/* ---------------------------
+   AUTH: Email/password + Anonymous + convert flow
+   --------------------------- */
+auth.onAuthStateChanged(async user=>{
+  if(user){
+    const name = user.displayName || (user.email ? user.email : (user.isAnonymous ? ('Guest-'+user.uid.slice(0,6)) : 'User'));
+    userArea.innerHTML = `<strong>${escapeHtml(name)}</strong>`;
+    authBtn.textContent = 'Sign out';
+    // try to sync pending if any
+    await syncPending();
+  } else {
+    userArea.textContent = 'Not signed in';
+    authBtn.textContent = 'Sign in / Register';
+  }
+});
+
+authBtn.addEventListener('click', ()=>{
+  if(auth.currentUser) {
+    if(confirm('Sign out?')) auth.signOut();
+    return;
+  }
+  openAuthModal();
+});
+
+/* UI highlight toggle for Email/Guest choice */
+function setChoice(choice){
+  if(choice === 'email'){ choiceEmail.classList.add('selected'); choiceGuest.classList.remove('selected'); }
+  else { choiceGuest.classList.add('selected'); choiceEmail.classList.remove('selected'); }
+}
+choiceEmail.addEventListener('click', ()=> setChoice('email'));
+choiceGuest.addEventListener('click', ()=> setChoice('guest'));
+
+/* open auth modal */
+function openAuthModal(){
+  const bd = document.createElement('div'); bd.className = 'modal-backdrop';
+  const m = document.createElement('div'); m.className = 'modal';
+  m.innerHTML = `<div class="close">✕</div><h3>Sign in / Register</h3>
+    <div style="display:flex;gap:12px;margin-top:12px">
+      <div style="flex:1">
+        <input id="emailField" class="inputNeon" placeholder="Email (you@example.com)" type="email" />
+        <input id="passField" class="inputNeon" placeholder="Password (min 6 chars)" type="password" style="margin-top:8px" />
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="btn" id="loginBtn">Login</button>
+          <button class="btn ghost" id="signupBtn">Register</button>
+          <button class="btn ghost" id="anonBtn">Play as Guest</button>
+        </div>
+        <div style="margin-top:8px" class="small">Tip: Guest = anonymous account. Convert to Email later to keep scores.</div>
+      </div>
+      <div style="width:260px;padding-left:12px;border-left:1px dashed rgba(255,255,255,0.03)">
+        <div style="font-weight:900">Convert Guest</div>
+        <div class="small" style="margin-top:6px">If you're playing as Guest you can convert (link) to an email/password account and preserve your UID and scores.</div>
+        <div style="height:12px"></div>
+        <button class="btn" id="convertBtn">Convert Guest → Email</button>
+      </div>
+    </div>`;
+  bd.appendChild(m); document.body.appendChild(bd);
+  // close handler
+  m.querySelector('.close').addEventListener('click', ()=> { bd.remove(); });
+  // fix input colors
+  const emailField = m.querySelector('#emailField'), passField = m.querySelector('#passField');
+  emailField.style.color = '#fff'; passField.style.color = '#fff';
+  // Login
+  m.querySelector('#loginBtn').addEventListener('click', async ()=>{
+    const email = emailField.value.trim(), pass = passField.value;
+    if(!email || !pass) return alert('Enter email & password.');
+    try{ await auth.signInWithEmailAndPassword(email, pass); bd.remove(); playSFX(800,0.06,'sine',0.06); } catch(e){ alert('Login failed: '+e.message); }
+  });
+  // Sign up
+  m.querySelector('#signupBtn').addEventListener('click', async ()=>{
+    const email = emailField.value.trim(), pass = passField.value;
+    if(!email || !pass) return alert('Enter email & password.');
+    try{
+      const cred = await auth.createUserWithEmailAndPassword(email, pass);
+      await cred.user.updateProfile({displayName: email.split('@')[0]});
+      bd.remove(); playSFX(1200,0.08,'sine',0.06);
+      alert('Registered & signed in.');
+    }catch(e){ alert('Register failed: '+e.message); }
+  });
+  // anonymous
+  m.querySelector('#anonBtn').addEventListener('click', async ()=>{
+    try{ await auth.signInAnonymously(); bd.remove(); alert('Signed in as guest. Convert later to keep scores.'); }catch(e){ alert('Guest sign-in failed: '+e.message); }
+  });
+  // convert guest
+  m.querySelector('#convertBtn').addEventListener('click', async ()=>{
+    const user = auth.currentUser;
+    if(!user) return alert('No authenticated user. Sign in as guest first.');
+    if(!user.isAnonymous) return alert('Your account is already permanent.');
+    const email = prompt('Enter email to convert this guest account to:', '');
+    if(!email) return;
+    const pass = prompt('Choose a password (min 6 chars):', '');
+    if(!pass) return;
+    const credential = firebase.auth.EmailAuthProvider.credential(email, pass);
+    try{
+      await user.linkWithCredential(credential);
+      await user.updateProfile({displayName: email.split('@')[0]});
+      alert('Guest account converted — UID preserved.');
+      bd.remove();
+    }catch(e){ alert('Conversion failed: '+e.message); }
+  });
+}
+
+/* ---------------------------
+   Modal helpers (for games/info)
+   - createModal(content, options)
+   - returns {close(), setContent()}
+   --------------------------- */
+function createModal(innerHtml, options={}){
+  const backdrop = document.createElement('div'); backdrop.className = 'modal-backdrop';
+  const modal = document.createElement('div'); modal.className = 'modal';
+  modal.innerHTML = `<div class="close">✕</div><div class="modalContent">${innerHtml}</div>`;
+  backdrop.appendChild(modal); document.body.appendChild(backdrop);
+  const closeBtn = modal.querySelector('.close');
+  function cleanup(){
+    try{ backdrop.remove(); }catch(e){}
+  }
+  closeBtn.addEventListener('click', ()=> { cleanup(); if(options.onClose) options.onClose(); });
+  return {
+    close: cleanup,
+    setContent: (html)=> { modal.querySelector('.modalContent').innerHTML = html; }
+  };
+}
+function showModal(html){ const m = createModal(html); return m; }
+
+/* ---------------------------
+   GAMES registry
+   Each entry: {id,name,section,thumb,desc,fn,how}
+   fn(container, done) -> done({score,time})
+   --------------------------- */
+const GAMES = [
+  { id:'memory', name:'Memory Match', section:'Puzzles', thumb:'🧠', desc:'Flip matching pairs quickly.', fn: game_memory, how: 'Flip cards to find matches. Faster & fewer moves = higher score.' },
+  { id:'snake', name:'Snake', section:'Classics', thumb:'🐍', desc:'Grow by eating dots. Avoid collisions.', fn: game_snake, how: 'Use arrow keys. Eat apples to grow.' },
+  { id:'ttt', name:'Tic-Tac-Toe', section:'Classics', thumb:'⭕️', desc:'Hotseat 2-player', fn: game_ttt, how: 'Play 2-player on same device. Get 3 in a row.' },
+  { id:'2048', name:'2048', section:'Puzzles', thumb:'🔢', desc:'Combine tiles to reach 2048.', fn: game_2048, how:'Use arrows; combine tiles to increase score.' },
+  { id:'reaction', name:'Reaction Test', section:'Competitive', thumb:'⚡', desc:'How fast are you?', fn: game_reaction, how:'Wait for green and click.' },
+  { id:'flappy', name:'Flappy', section:'Arcade', thumb:'🐦', desc:'Tap to fly through gaps.', fn: game_flappy, how:'Tap or press Space to flap.' },
+  // Extras: add Breakout or Pong later if you want
+];
+
+/* build menu */
+function buildMenu(){
+  menuGrid.innerHTML = '';
+  const sections = {};
+  GAMES.forEach(g=> { sections[g.section] = sections[g.section] || []; sections[g.section].push(g); });
+  for(const section of Object.keys(sections)){
+    const header = document.createElement('div'); header.innerHTML = `<div style="font-weight:900;margin-top:4px">${escapeHtml(section)}</div><div class="small" style="margin-bottom:6px">${sections[section].length} games</div>`;
+    menuGrid.appendChild(header);
+    sections[section].forEach(g=>{
+      const card = document.createElement('div'); card.className = 'card'; card.dataset.id = g.id;
+      card.innerHTML = `<div class="thumb">${g.thumb}</div><div style="display:flex;justify-content:space-between;width:100%"><div style="font-weight:900">${escapeHtml(g.name)}</div><div class="small">${escapeHtml(g.section)}</div></div><div class="meta">${escapeHtml(g.desc)}</div>`;
+      card.addEventListener('click', ()=> selectGame(g.id));
+      // allow context menu to show rules
+      card.addEventListener('contextmenu', (e)=>{ e.preventDefault(); showHow(g); });
+      menuGrid.appendChild(card);
+    });
+  }
+}
+buildMenu();
+
+/* search */
+$('#search').addEventListener('input', e=>{
+  const q = e.target.value.trim().toLowerCase();
+  if(!q){ buildMenu(); return; }
+  const filtered = GAMES.filter(g=> g.name.toLowerCase().includes(q) || g.desc.toLowerCase().includes(q));
+  menuGrid.innerHTML = '';
+  filtered.forEach(g=>{
+    const card = document.createElement('div'); card.className='card'; card.dataset.id=g.id;
+    card.innerHTML = `<div class="thumb">${g.thumb}</div><div style="display:flex;justify-content:space-between;width:100%"><div style="font-weight:900">${escapeHtml(g.name)}</div><div class="small">${escapeHtml(g.section)}</div></div><div class="meta">${escapeHtml(g.desc)}</div>`;
+    card.addEventListener('click', ()=> selectGame(g.id));
+    menuGrid.appendChild(card);
+  });
+});
+
+/* ---------------------------
+   selectGame -> shows overlay with Play + Info
+   when Play clicked -> open game modal (centered) and run game inside modal canvas
+   --------------------------- */
+function selectGame(id){
+  const g = GAMES.find(x=>x.id===id);
+  if(!g) return;
+  state.currentGameId = id;
+  uiUpdate();
+  $$('.card').forEach(c=> c.style.outline = (c.dataset.id===id) ? '2px solid rgba(160,76,255,0.25)' : 'none');
+  stageInner.innerHTML = `<div style="text-align:center;width:100%"><h3 style="margin:0">${escapeHtml(g.name)}</h3><p class="small">${escapeHtml(g.desc)}</p><div style="height:12px"></div><div style="display:flex;gap:8px;justify-content:center"><button class="btn" id="playBtn">Play</button><button class="btn ghost" id="howPlay">How</button><button class="btn ghost" id="liveBtn">Live Board</button></div></div>`;
+  document.getElementById('playBtn').addEventListener('click', ()=> openGameModal(id));
+  document.getElementById('howPlay').addEventListener('click', ()=> showHow(g));
+  document.getElementById('liveBtn').addEventListener('click', ()=> { subscribeLiveLeaderboard(id); alert('Live leaderboard updated on the right'); });
+  subscribeLiveLeaderboard(id);
+}
+
+/* open game modal: plays game inside canvas or DOM area, with cleanup */
+function openGameModal(gameId){
+  const game = GAMES.find(g=>g.id===gameId);
+  if(!game) return;
+  // create modal with canvas container
+  const modalHtml = `<h3 style="margin-top:0">${escapeHtml(game.name)}</h3>
+    <div style="display:flex;gap:12px">
+      <div style="flex:1">
+        <div class="gameContainer" id="gameArea"></div>
+        <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+          <button class="btn" id="saveScoreBtn">Save Score</button>
+          <button class="btn ghost" id="closeGameBtn">Close</button>
+          <div style="flex:1"></div>
+          <div class="small" id="gameTimer">00:00</div>
+        </div>
+      </div>
+      <div style="width:260px">
+        <div style="font-weight:900">Live</div><div id="miniLive" class="small" style="margin-top:8px">Top scores will appear here while you play.</div>
+        <div style="height:10px"></div>
+        <div style="font-weight:900;margin-top:8px">How to play</div><div class="small" style="margin-top:6px">${escapeHtml(game.how)}</div>
+      </div>
+    </div>`;
+  const modal = createModal(modalHtml, {onClose: ()=> { /* cleanup performed by returned close handler below if needed */ }});
+  // run game inside #gameArea
+  const gameArea = document.getElementById('gameArea');
+  // create a canvas for canvas-based games; for DOM games, pass container
+  const canvas = document.createElement('canvas'); canvas.className = 'gameCanvas'; canvas.width = Math.min(900, window.innerWidth - 200); canvas.height = 420;
+  gameArea.appendChild(canvas);
+  // update live panel inside modal
+  function miniLiveUpdate(snapshot){
+    const elMini = document.getElementById('miniLive');
+    let html = '<ol style="margin-left:18px;color:var(--muted)">';
+    snapshot.forEach(doc=> {
+      const d = doc.data();
+      html += `<li><strong>${escapeHtml(d.name||'Player')}</strong> — ${d.score}</li>`;
+    });
+    html += '</ol>';
+    elMini.innerHTML = html;
+  }
+  // subscribe to live leaderboard for the game while modal open
+  const unsub = db.collection('leaderboards').doc(gameId).collection('scores').orderBy('score','desc').limit(8).onSnapshot(snapshot=> miniLiveUpdate(snapshot), err=> console.warn('mini live error', err));
+  // attach a single keyboard handler for modal
+  function modalKeyHandler(e){ if(state.keyboardHandler) state.keyboardHandler(e); }
+  window.addEventListener('keydown', modalKeyHandler);
+
+  // run the game's function: it will accept (container, done, {canvas})
+  let finished = false;
+  const doneCallback = async (result)=>{
+    if(finished) return; finished = true;
+    stopTimer();
+    state.score = result.score || state.score;
+    state.elapsed = result.time || state.elapsed;
+    uiUpdate();
+    // show save option (button already present)
+    document.getElementById('saveScoreBtn').disabled = false;
+    playSFX(1000,0.08,'sine',0.06);
+  };
+  // disable save until game finishes
+  document.getElementById('saveScoreBtn').disabled = true;
+  // save handler
+  document.getElementById('saveScoreBtn').addEventListener('click', async ()=>{
+    if(!finished) return alert('Finish the run first to save.');
+    let displayName = auth.currentUser ? (auth.currentUser.displayName || auth.currentUser.email || ('Guest-'+auth.currentUser.uid.slice(0,6))) : prompt('Enter name to save locally:','Guest') || 'Guest';
+    saveLocalScore(gameId, displayName, state.score, state.elapsed);
+    if(auth.currentUser){
+      try{
+        await db.collection('leaderboards').doc(gameId).collection('scores').add({
+          uid: auth.currentUser.uid,
+          name: displayName,
+          score: Number(state.score),
+          time: Number(state.elapsed),
+          ts: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        alert('Published to live leaderboard!');
+        launchConfetti(80);
+      }catch(e){
+        console.warn('publish failed', e);
+        addPending(gameId, displayName, state.score, state.elapsed);
+        alert('Publish failed (offline/rules) — queued locally.');
+      }
+    } else {
+      addPending(gameId, displayName, state.score, state.elapsed);
+      if(confirm('Sign in to publish your score to the live leaderboard?')) openAuthModal();
+      else alert('Saved locally & queued.');
+    }
+  });
+  // close handler
+  document.getElementById('closeGameBtn').addEventListener('click', ()=> {
+    modal.close();
+    // cleanup: unsubscribe live, remove keyboard handler
+    try{ unsub(); }catch(e){}
+    window.removeEventListener('keydown', modalKeyHandler);
+    // cancel game loops via cleanup attached to modal (see below)
+    if(state.activeModal && state.activeModal.cleanup) state.activeModal.cleanup();
+    state.activeModal = null;
+    // reset keyboardHandler
+    state.keyboardHandler = null;
+  });
+
+  // Start timer for display inside modal
+  startTimer();
+  // expose modal cleanup hook to state.activeModal for closure by other code
+  state.activeModal = { cleanup: ()=> { stopTimer(); if(unsub) try{ unsub(); }catch(e){} } };
+
+  // run the actual game implementation with the provided canvas
+  // wrap call in try/catch so errors don't break UI
+  try{
+    // Each game fn must accept: containerElement, doneCallback, options
+    // We'll pass {canvas, setKeyboardHandler} where setKeyboardHandler installs per-game key handler
+    const options = {
+      canvas,
+      setKeyboardHandler: (h)=>{ state.keyboardHandler = h; }
+    };
+    // call the game's fn, allow it to be async
+    game.fn(gameArea, doneCallback, options);
+  }catch(e){
+    console.error('game run error', e);
+    alert('Game error — check console.');
+  }
+}
+
+/* ---------------------------
+   showHow modal
+   --------------------------- */
+function showHow(game){
+  showModal(`<h3>How to play — ${escapeHtml(game.name)}</h3><p class="small">${escapeHtml(game.how)}</p><p class="small">Scoring: speed + accuracy when applicable. Save scores after finishing. Sign in to publish.</p>`);
+}
+
+/* ---------------------------
+   Default run: quick suite
+   --------------------------- */
+startDefault.addEventListener('click', async ()=>{
+  const run = ['memory','snake','reaction'];
+  for(const id of run){
+    selectGame(id);
+    // open modal and auto-start
+    openGameModal(id);
+    // wait for finished -> polling (since game finishes call done)
+    await new Promise(resolve=>{
+      const check = setInterval(()=>{
+        // when save button enabled -> assume finished
+        const saveBtn = document.getElementById('saveScoreBtn');
+        if(saveBtn && !saveBtn.disabled){ clearInterval(check); setTimeout(resolve, 600); }
+      }, 400);
+      // safety timeout
+      setTimeout(()=>{ clearInterval(check); resolve(); }, 180000);
+    });
+  }
+  alert('Quick run complete!');
+});
+
+/* ---------------------------
+   Core game implementations
+   Each accepts (container, done, options)
+   - Must call done({score, time}) when finished
+   - Must use options.canvas for rendering where applicable
+   - Must call options.setKeyboardHandler(fn) to receive keyboard events
+   - Must stop all animation loops and remove handlers on finish
+   --------------------------- */
+
+/* ---- Memory Match ---- */
+function game_memory(container, done, options){
+  // DOM-based, light - will run inside container but we created canvas earlier too; use container for cards
+  const parent = container.querySelector('#gameArea') || container;
+  parent.innerHTML = '';
   const symbols = ['★','☯','✦','♠','♣','♥','♦','✺','⚑','⚙','☀','☾','⚡','✶','✹','✿'];
   const pairs = 8;
   const selected = shuffle(symbols).slice(0,pairs);
   const cards = shuffle(selected.concat(selected));
   const grid = document.createElement('div'); grid.style.display='grid'; grid.style.gridTemplateColumns='repeat(4,1fr)'; grid.style.gap='12px'; grid.style.width='100%';
-  container.appendChild(grid);
+  parent.appendChild(grid);
   state.moves = 0; state.score = 0; uiUpdate();
-  const st = { revealed:[], matched:0, lock:false };
+  const st = {revealed:[],matched:0,lock:false};
+  // create reusable elements
   cards.forEach((s,i)=>{
-    const c = document.createElement('div'); c.className='card'; c.style.height='96px'; c.style.fontSize='34px'; c.textContent='';
+    const c = document.createElement('div'); c.className='card'; c.style.height='96px'; c.style.fontSize='34px'; c.style.display='grid'; c.style.placeItems='center'; c.textContent='';
     c.dataset.sym = s; c.dataset.i = i;
-    c.addEventListener('click', ()=>{
-      if(st.lock) return;
-      if(c.classList.contains('revealed')) return;
-      c.classList.add('revealed'); c.textContent = s;
-      state.moves++; uiUpdate(); playTone(600,0.04);
-      st.revealed.push(c);
-      if(st.revealed.length===2){
-        const [a,b] = st.revealed; st.lock = true;
-        setTimeout(()=>{
-          if(a.dataset.sym === b.dataset.sym){
-            a.classList.add('matched'); b.classList.add('matched'); st.matched++; state.score += 200; playTone(1000,0.08);
-          } else {
-            a.classList.remove('revealed'); b.classList.remove('revealed'); a.textContent=''; b.textContent=''; playTone(220,0.06);
-          }
-          st.revealed = []; st.lock=false; uiUpdate();
-          if(st.matched === pairs){ stopTimer(); awardAchievement('memory_first','Memory Master: Completed Memory Match'); done({score:state.score, time: state.elapsed}); }
-        }, 550);
-      }
-    });
+    c.addEventListener('click', onClick);
     grid.appendChild(c);
   });
-  // reveal briefly
+  function onClick(e){
+    const c = e.currentTarget;
+    if(st.lock) return;
+    if(c.classList.contains('revealed')) return;
+    c.classList.add('revealed'); c.textContent = c.dataset.sym;
+    playSFX(600,0.04); state.moves++; uiUpdate();
+    st.revealed.push(c);
+    if(st.revealed.length===2){
+      const [a,b] = st.revealed; st.lock = true;
+      setTimeout(()=>{
+        if(a.dataset.sym === b.dataset.sym){
+          a.classList.add('matched'); b.classList.add('matched'); st.matched++; state.score += 250; playSFX(1000,0.08);
+        } else {
+          a.classList.remove('revealed'); b.classList.remove('revealed'); a.textContent=''; b.textContent=''; playSFX(220,0.06);
+        }
+        st.revealed = []; st.lock=false; uiUpdate();
+        if(st.matched === pairs){ stopTimer(); awardAchievement('memory_first','Memory Master'); done({score:state.score, time: state.elapsed}); }
+      }, 600);
+    }
+  }
+  // brief reveal
   Array.from(grid.children).forEach((c,i)=> setTimeout(()=>{ c.classList.add('revealed'); c.textContent = c.dataset.sym; }, 80 + i*20));
   setTimeout(()=> Array.from(grid.children).forEach(c=>{ c.classList.remove('revealed'); c.textContent=''; }), 1200);
   startTimer();
+  // cleanup - attach to state.activeModal
+  if(state.activeModal) state.activeModal.cleanup = ()=> { stopTimer(); };
 }
 
-/* Slide Puzzle (swap) */
-function game_puzzle(container, done){
-  container.innerHTML=''; stopTimer();
-  const size = 4; const total = size*size;
-  const puzzle = document.createElement('div'); puzzle.style.display='grid'; puzzle.style.gridTemplateColumns = `repeat(${size}, 1fr)`; puzzle.style.gap='6px'; puzzle.style.width='100%';
-  const bg = proceduralSVG(800);
-  let tiles = Array.from({length:total}, (_,i)=>i);
-  tiles = shuffle(tiles);
-  tiles.forEach((idx)=>{
-    const tile = document.createElement('div'); tile.style.height='96px'; tile.style.borderRadius='6px';
-    if(idx===total-1){ tile.className='p-empty'; tile.style.background='linear-gradient(90deg, rgba(255,255,255,0.01), rgba(255,255,255,0.01))'; tile.textContent=''; }
-    else { tile.className='p-piece'; tile.style.backgroundImage=bg; tile.style.backgroundSize=`${size*100}% ${size*100}%`; const r=Math.floor(idx/size), c=idx%size; tile.style.backgroundPosition=`${(c/(size-1))*100}% ${(r/(size-1))*100}%`; }
-    tile.dataset.correct = idx; tile.addEventListener('click', ()=> {
-      const children = Array.from(puzzle.children);
-      const emptyIdx = children.findIndex(ch=>ch.classList.contains('p-empty'));
-      const myIdx = children.indexOf(tile);
-      swapTiles(puzzle, myIdx, emptyIdx);
-      state.moves++; uiUpdate(); playTone(720,0.04);
-      const doneFlag = Array.from(puzzle.children).every((ch, idx) => Number(ch.dataset.correct) === idx);
-      if(doneFlag){ stopTimer(); awardAchievement('puzzle_first','Puzzle Solver'); done({score:800, time: state.elapsed}); }
-    });
-    puzzle.appendChild(tile);
-  });
-  container.appendChild(puzzle);
-  startTimer();
-  function swapTiles(puz,a,b){
-    const ch = Array.from(puz.children);
-    const A = ch[a], B = ch[b];
-    const aHTML = A.innerHTML, aClass = A.className, aCorrect = A.dataset.correct;
-    A.innerHTML = B.innerHTML; A.className = B.className; A.dataset.correct = B.dataset.correct;
-    B.innerHTML = aHTML; B.className = aClass; B.dataset.correct = aCorrect;
-  }
-}
-function proceduralSVG(size=800){
-  const svg = encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size}'><defs><linearGradient id='g' x1='0' x2='1'><stop offset='0' stop-color='#9b5cff'/><stop offset='1' stop-color='#00d4ff'/></linearGradient></defs><rect width='100%' height='100%' fill='url(#g)'/><circle cx='200' cy='180' r='160' fill='rgba(255,255,255,0.03)'/></svg>`);
-  return `url("data:image/svg+xml;utf8,${svg}")`;
-}
-
-/* Quick Quiz */
-function game_quiz(container, done){
-  container.innerHTML=''; stopTimer();
-  const qset = [
-    {q:'Which data structure is FIFO?', a:['Stack','Queue','Tree','Hash'], c:1},
-    {q:'SQL stands for?', a:['Strong Query Lang','Structured Query Language','Simple Query List','Server Query Logic'], c:1},
-    {q:'Single-file project uses?', a:['Python','HTML','C++','Java'], c:1},
-    {q:'Which is NOT a JS framework?', a:['React','Vue','Laravel','Angular'], c:2},
-    {q:'Array method to add at end?', a:['push','pop','shift','unshift'], c:0}
-  ];
-  let i=0, localScore=0;
-  const wrap = document.createElement('div'); wrap.style.width='100%';
-  container.appendChild(wrap);
-  startTimer();
-  renderQ();
-  function renderQ(){
-    wrap.innerHTML = '';
-    const cur = qset[i];
-    const qEl = document.createElement('div'); qEl.className='small'; qEl.style.fontSize='18px'; qEl.textContent = `Q${i+1}. ${cur.q}`;
-    wrap.appendChild(qEl);
-    cur.a.forEach((opt, idx)=>{
-      const b = document.createElement('div'); b.className='btn ghost'; b.style.display='block'; b.style.width='100%'; b.style.marginTop='8px';
-      b.textContent = opt;
-      b.addEventListener('click', ()=>{
-        if(idx===cur.c){ b.style.background='linear-gradient(90deg,#00d4ff,#9b5cff)'; localScore += 250; playTone(900,0.06); }
-        else { b.style.opacity = 0.6; playTone(240,0.06); }
-        i++; state.moves++; uiUpdate();
-        setTimeout(()=>{ if(i>=qset.length){ state.score += localScore; stopTimer(); awardAchievement('quiz_master','Quiz Whiz'); done({score:state.score, time:state.elapsed}); } else renderQ(); }, 650);
-      });
-      wrap.appendChild(b);
-    });
-  }
-}
-
-/* Snake */
-function game_snake(container, done){
-  container.innerHTML=''; stopTimer();
-  const canvas = document.createElement('canvas'); canvas.width = Math.min(780, window.innerWidth-300); canvas.height = 420; canvas.style.borderRadius='8px';
-  container.appendChild(canvas);
+/* ---- Snake (canvas, rAF) ---- */
+function game_snake(container, done, options){
+  const canvas = options.canvas;
   const ctx = canvas.getContext('2d');
   const grid = 20;
-  const w = Math.floor(canvas.width / grid), h = Math.floor(canvas.height / grid);
-  let snake = [{x:Math.floor(w/2), y:Math.floor(h/2)}]; let dir = {x:1,y:0}; let apple = spawn(); let tick;
-  state.score = 0; state.moves = 0; uiUpdate(); startTimer();
-  function spawn(){ return {x: rand(w), y: rand(h)}; }
+  let w = Math.floor(canvas.width / grid), h = Math.floor(canvas.height / grid);
+  let snake = [{x:Math.floor(w/2), y:Math.floor(h/2)}];
+  let dir = {x:1,y:0}, pendingDir = null;
+  let apple = spawn();
+  let running = true;
+  state.score = 0; state.moves = 0; uiUpdate();
+  let lastFrame = 0;
+  const speed = 120; // ms per move
+  // keyboard handler
+  options.setKeyboardHandler((e)=>{
+    if(e.key === 'ArrowUp' && dir.y!==1) pendingDir = {x:0,y:-1};
+    if(e.key === 'ArrowDown' && dir.y!==-1) pendingDir = {x:0,y:1};
+    if(e.key === 'ArrowLeft' && dir.x!==1) pendingDir = {x:-1,y:0};
+    if(e.key === 'ArrowRight' && dir.x!==-1) pendingDir = {x:1,y:0};
+  });
+  function spawn(){ w = Math.floor(canvas.width / grid); h = Math.floor(canvas.height / grid); return {x: rand(w), y: rand(h)}; }
   function draw(){
     ctx.fillStyle = '#06111a'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    // apple
     ctx.fillStyle='tomato'; ctx.fillRect(apple.x*grid, apple.y*grid, grid-2, grid-2);
-    ctx.fillStyle='lime'; snake.forEach(s=> ctx.fillRect(s.x*grid, s.y*grid, grid-2, grid-2));
+    // snake
+    ctx.fillStyle='lime';
+    snake.forEach(s=> ctx.fillRect(s.x*grid, s.y*grid, grid-2, grid-2));
+    // score
+    ctx.fillStyle='white'; ctx.font = '14px sans-serif'; ctx.fillText('Score: ' + state.score, 10, 18);
   }
-  function step(){
-    const head = {x:snake[0].x + dir.x, y:snake[0].y + dir.y};
-    if(head.x < 0) head.x = w-1; if(head.x >= w) head.x = 0;
-    if(head.y < 0) head.y = h-1; if(head.y >= h) head.y = 0;
-    if(snake.some(s=>s.x===head.x && s.y===head.y)){ clearInterval(tick); window.removeEventListener('keydown', onKey); stopTimer(); alert('Game over — score: '+state.score); done({score: state.score, time: state.elapsed}); return; }
-    snake.unshift(head);
-    if(head.x===apple.x && head.y===apple.y){ state.score += 60; apple = spawn(); playTone(1000,0.06); state.moves++; uiUpdate(); } else snake.pop();
-    draw();
-  }
-  tick = setInterval(step, 100);
-  function onKey(e){
-    if(e.key==='ArrowUp' && dir.y!==1) dir={x:0,y:-1};
-    if(e.key==='ArrowDown' && dir.y!==-1) dir={x:0,y:1};
-    if(e.key==='ArrowLeft' && dir.x!==1) dir={x:-1,y:0};
-    if(e.key==='ArrowRight' && dir.x!==-1) dir={x:1,y:0};
-  }
-  window.addEventListener('keydown', onKey);
-  setTimeout(()=>{ clearInterval(tick); window.removeEventListener('keydown', onKey); stopTimer(); done({score:state.score, time:state.elapsed}); }, 150000);
-}
-
-/* Tic-Tac-Toe */
-function game_ttt(container, done){
-  container.innerHTML=''; stopTimer();
-  const grid = document.createElement('div'); grid.style.display='grid'; grid.style.gridTemplateColumns='repeat(3,120px)'; grid.style.gap='8px';
-  container.appendChild(grid);
-  const board = Array(9).fill(null); let turn='X';
-  function render(){ grid.innerHTML=''; board.forEach((v,i)=>{
-    const c = document.createElement('div'); c.style.width='120px'; c.style.height='120px'; c.style.display='grid'; c.style.placeItems='center'; c.style.fontSize='48px'; c.style.borderRadius='8px'; c.style.cursor='pointer'; c.style.background='linear-gradient(180deg, rgba(255,255,255,0.01), transparent)'; c.textContent = v || '';
-    c.addEventListener('click', ()=> {
-      if(board[i]) return;
-      board[i] = turn; state.moves++; uiUpdate(); playTone(turn==='X'?800:600,0.05); render();
-      const winner = checkWin();
-      if(winner){ setTimeout(()=>{ alert(`${winner} wins!`); done({score: 350, time: state.elapsed}); }, 120); }
-      else if(board.every(Boolean)){ setTimeout(()=>{ alert('Draw!'); done({score:50, time: state.elapsed}); },120); }
-      turn = (turn==='X'?'O':'X');
-    });
-    grid.appendChild(c);
-  }); }
-  function checkWin(){ const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]; for(const w of wins){ const [a,b,c] = w; if(board[a] && board[a]===board[b] && board[a]===board[c]) return board[a]; } return null; }
-  startTimer(); render();
-}
-
-/* Minesweeper */
-function game_mines(container, done){
-  container.innerHTML=''; stopTimer();
-  const rows = 8, cols = 8, minesCount = 10;
-  const wrap = document.createElement('div'); wrap.style.display='inline-block';
-  const grid = document.createElement('div'); grid.style.display='grid'; grid.style.gridTemplateColumns=`repeat(${cols},36px)`; grid.style.gap='4px';
-  wrap.appendChild(grid); container.appendChild(wrap);
-  const cells = [];
-  for(let r=0;r<rows;r++) for(let c=0;c<cols;c++) cells.push({r,c,isMine:false,adj:0,revealed:false,flagged:false,el:null});
-  shuffle(cells).slice(0,minesCount).forEach(ch=> ch.isMine = true);
-  const map = {}; cells.forEach(ch=> map[`${ch.r},${ch.c}`] = ch);
-  cells.forEach(ch=> { let adj=0; for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++){ if(dr===0 && dc===0) continue; const n = map[`${ch.r+dr},${ch.c+dc}`]; if(n && n.isMine) adj++; } ch.adj = adj; });
-  cells.forEach(ch=>{ const b = document.createElement('div'); b.style.width='36px'; b.style.height='36px'; b.style.borderRadius='6px'; b.style.display='grid'; b.style.placeItems='center'; b.style.background='linear-gradient(180deg, rgba(255,255,255,0.01), transparent)'; b.style.cursor='pointer'; b.textContent=''; b.addEventListener('click', ()=> reveal(ch)); b.addEventListener('contextmenu', (e)=> { e.preventDefault(); ch.flagged = !ch.flagged; b.textContent = ch.flagged ? '⚑' : ''; }); ch.el = b; grid.appendChild(b); });
-  startTimer();
-  function reveal(ch){
-    if(ch.revealed || ch.flagged) return;
-    ch.revealed = true; ch.el.style.background = '#f3f6f9'; ch.el.style.color = '#06142a';
-    if(ch.isMine){ ch.el.textContent = '💣'; stopTimer(); alert('Boom! You hit a mine.'); done({score:0, time: state.elapsed}); return; }
-    if(ch.adj>0) ch.el.textContent = ch.adj;
-    else {
-      for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++){
-        const nr = ch.r+dr, nc = ch.c+dc;
-        const n = map[`${nr},${nc}`];
-        if(n && !n.revealed) reveal(n);
-      }
+  function step(now){
+    if(!lastFrame) lastFrame = now;
+    const diff = now - lastFrame;
+    if(diff >= speed){
+      lastFrame = now;
+      // apply pending dir
+      if(pendingDir){ dir = pendingDir; pendingDir = null; }
+      const head = {x:snake[0].x + dir.x, y:snake[0].y + dir.y};
+      // wrap
+      if(head.x < 0) head.x = w-1; if(head.x >= w) head.x = 0;
+      if(head.y < 0) head.y = h-1; if(head.y >= h) head.y = 0;
+      // collision
+      if(snake.some(s=>s.x===head.x && s.y===head.y)){ running = false; stopTimer(); playSFX(120,0.12,'square',0.06); done({score: state.score, time: state.elapsed}); return; }
+      snake.unshift(head);
+      if(head.x === apple.x && head.y === apple.y){ state.score += 70; apple = spawn(); playSFX(900,0.06,'sine',0.06); state.moves++; uiUpdate(); } else snake.pop();
     }
-    const safeLeft = cells.filter(x=>!x.isMine && !x.revealed).length;
-    if(safeLeft===0){ stopTimer(); awardAchievement('mines_first','Minesweeper Ace'); done({score:500 + (300 - Math.floor(state.elapsed/1000)), time:state.elapsed}); }
+    draw();
+    if(running) requestAnimationFrame(step);
   }
+  // start
+  startTimer();
+  requestAnimationFrame(step);
+  // cleanup
+  state.activeModal.cleanup = ()=> { running = false; stopTimer(); state.keyboardHandler = null; };
 }
 
-/* 2048 */
-function game_2048(container, done){
-  container.innerHTML=''; stopTimer();
+/* ---- Tic-Tac-Toe (DOM-based) ---- */
+function game_ttt(container, done){
+  const parent = container.querySelector('#gameArea') || container;
+  parent.innerHTML = '';
+  const grid = document.createElement('div'); grid.style.display='grid'; grid.style.gridTemplateColumns='repeat(3,120px)'; grid.style.gap='8px';
+  parent.appendChild(grid);
+  const board = Array(9).fill(null); let turn='X';
+  state.moves = 0; state.score = 0; uiUpdate();
+  function render(){
+    grid.innerHTML = '';
+    board.forEach((v,i)=>{
+      const c = document.createElement('div'); c.style.width='120px'; c.style.height='120px'; c.style.display='grid'; c.style.placeItems='center'; c.style.fontSize='48px'; c.style.borderRadius='8px'; c.style.cursor='pointer'; c.style.background='linear-gradient(180deg, rgba(255,255,255,0.01), transparent)';
+      c.textContent = v || '';
+      c.addEventListener('click', ()=>{
+        if(board[i]) return;
+        board[i] = turn; state.moves++; uiUpdate(); playSFX(turn==='X'?800:600,0.05);
+        const winner = checkWin();
+        if(winner){ setTimeout(()=>{ alert(`${winner} wins!`); done({score: 350, time: state.elapsed}); }, 120); }
+        else if(board.every(Boolean)){ setTimeout(()=>{ alert('Draw!'); done({score:50, time: state.elapsed}); },120); }
+        turn = (turn==='X'?'O':'X'); render();
+      });
+      grid.appendChild(c);
+    });
+  }
+  function checkWin(){ const wins=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]; for(const w of wins){ const [a,b,c]=w; if(board[a] && board[a]===board[b] && board[a]===board[c]) return board[a]; } return null; }
+  startTimer(); render();
+  state.activeModal.cleanup = ()=> { stopTimer(); };
+}
+
+/* ---- 2048 (canvas-lite) ---- */
+function game_2048(container, done, options){
+  const canvas = options.canvas;
+  const ctx = canvas.getContext('2d');
   const size = 4;
-  const wrap = document.createElement('div'); wrap.style.display='inline-block';
-  const board = Array.from({length:size}, ()=>Array(size).fill(0));
-  const elBoard = document.createElement('div'); elBoard.style.display='grid'; elBoard.style.gridTemplateColumns=`repeat(${size}, 90px)`; elBoard.style.gap='8px';
-  wrap.appendChild(elBoard); container.appendChild(wrap);
-  function render(){ elBoard.innerHTML=''; for(let r=0;r<size;r++) for(let c=0;c<size;c++){ const v=board[r][c]; const tile = document.createElement('div'); tile.style.width='90px'; tile.style.height='90px'; tile.style.borderRadius='8px'; tile.style.display='grid'; tile.style.placeItems='center'; tile.style.fontSize='22px'; tile.style.fontWeight='800'; tile.style.background = v ? 'linear-gradient(135deg,#fff,#f0f0ff)' : 'rgba(255,255,255,0.02)'; tile.style.color = v ? '#06142a' : 'var(--muted)'; tile.textContent = v || ''; elBoard.appendChild(tile); } }
-  function addRandom(){ const empties = []; for(let r=0;r<size;r++) for(let c=0;c<size;c++) if(board[r][c]===0) empties.push([r,c]); if(empties.length===0) return; const [r,c] = empties[rand(empties.length)]; board[r][c] = Math.random() < 0.9 ? 2 : 4; }
-  function moveLeft(){ let moved=false; for(let r=0;r<size;r++){ let row = board[r].filter(v=>v); for(let i=0;i<row.length-1;i++){ if(row[i]===row[i+1]){ row[i]*=2; row[i+1]=0; i++; } } row = row.filter(v=>v); while(row.length < size) row.push(0); for(let c=0;c<size;c++){ if(board[r][c]!==row[c]) moved=true; board[r][c]=row[c]; } } if(moved) addRandom(); render(); checkGameOver(); }
-  function rotate90(){ const tmp = Array.from({length:size}, ()=>Array(size).fill(0)); for(let r=0;r<size;r++) for(let c=0;c<size;c++) tmp[c][size-1-r]=board[r][c]; for(let r=0;r<size;r++) for(let c=0;c<size;c++) board[r][c]=tmp[r][c]; }
-  function rotate180(){ rotate90(); rotate90(); }
-  function rotate270(){ rotate90(); rotate90(); rotate90(); }
-  function moveRight(){ rotate180(); moveLeft(); rotate180(); }
-  function moveUp(){ rotate90(); moveLeft(); rotate270(); }
-  function moveDown(){ rotate270(); moveLeft(); rotate90(); }
-  function checkGameOver(){ const flat = board.flat(); if(flat.some(x=>x===2048)){ stopTimer(); awardAchievement('2048_win','Reached 2048'); done({score: Math.max(...flat), time: state.elapsed}); return; } const movesPossible = canMove(); if(!movesPossible){ stopTimer(); alert('Game over!'); done({score: Math.max(...flat), time: state.elapsed}); } }
-  function canMove(){ for(let r=0;r<size;r++) for(let c=0;c<size;c++) if(board[r][c]===0) return true; for(let r=0;r<size;r++) for(let c=0;c<size-1;c++) if(board[r][c]===board[r][c+1]) return true; for(let c=0;c<size;c++) for(let r=0;r<size-1;r++) if(board[r][c]===board[r+1][c]) return true; return false; }
-
-  addRandom(); addRandom(); render(); startTimer();
-  function onKey(e){
-    if(e.key==='ArrowLeft'){ moveLeft(); state.moves++; uiUpdate(); }
-    if(e.key==='ArrowRight'){ moveRight(); state.moves++; uiUpdate(); }
-    if(e.key==='ArrowUp'){ moveUp(); state.moves++; uiUpdate(); }
-    if(e.key==='ArrowDown'){ moveDown(); state.moves++; uiUpdate(); }
+  let board = Array.from({length:size}, ()=>Array(size).fill(0));
+  function addRandom(){
+    const empties = [];
+    for(let r=0;r<size;r++) for(let c=0;c<size;c++) if(board[r][c]===0) empties.push([r,c]);
+    if(empties.length===0) return;
+    const [r,c] = empties[rand(empties.length)];
+    board[r][c] = Math.random() < 0.9 ? 2 : 4;
   }
-  window.addEventListener('keydown', onKey);
-  setTimeout(()=>{ window.removeEventListener('keydown', onKey); stopTimer(); done({score: Math.max(...board.flat()), time: state.elapsed}); }, 180000);
+  function render(){
+    ctx.fillStyle = '#06111a'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.font = '20px sans-serif';
+    for(let r=0;r<size;r++) for(let c=0;c<size;c++){
+      const v = board[r][c];
+      const x = c*(canvas.width/size) + 10, y = r*(canvas.height/size) + 10;
+      ctx.fillStyle = v ? '#fff' : 'rgba(255,255,255,0.06)';
+      ctx.fillRect(c*(canvas.width/size) + 6, r*(canvas.height/size) + 6, canvas.width/size - 12, canvas.height/size - 12);
+      ctx.fillStyle = v ? '#06142a' : '#9fb3c8';
+      if(v) ctx.fillText(v, x + 18, y + 40);
+    }
+  }
+  function moveLeft(){
+    let moved=false;
+    for(let r=0;r<size;r++){
+      let row = board[r].filter(v=>v);
+      for(let i=0;i<row.length-1;i++){
+        if(row[i]===row[i+1]){ row[i]*=2; row[i+1]=0; i++; }
+      }
+      row = row.filter(v=>v);
+      while(row.length < size) row.push(0);
+      for(let c=0;c<size;c++){ if(board[r][c]!==row[c]) moved=true; board[r][c]=row[c]; }
+    }
+    if(moved) addRandom();
+    render();
+    checkGameOver();
+  }
+  function rotate90(){ const tmp = Array.from({length:size}, ()=>Array(size).fill(0)); for(let r=0;r<size;r++) for(let c=0;c<size;c++) tmp[c][size-1-r]=board[r][c]; board = tmp; }
+  function moveRight(){ rotate90(); rotate90(); moveLeft(); rotate90(); rotate90(); }
+  function moveUp(){ rotate90(); rotate90(); rotate90(); moveLeft(); rotate90(); }
+  function moveDown(){ rotate90(); moveLeft(); rotate90(); rotate90(); rotate90(); }
+  function canMove(){
+    for(let r=0;r<size;r++) for(let c=0;c<size;c++) if(board[r][c]===0) return true;
+    for(let r=0;r<size;r++) for(let c=0;c<size-1;c++) if(board[r][c]===board[r][c+1]) return true;
+    for(let c=0;c<size;c++) for(let r=0;r<size-1;r++) if(board[r][c]===board[r+1][c]) return true;
+    return false;
+  }
+  function checkGameOver(){
+    if(board.flat().some(x=>x===2048)){ stopTimer(); awardAchievement('2048_win','Reached 2048'); done({score: Math.max(...board.flat()), time: state.elapsed}); return; }
+    if(!canMove()){ stopTimer(); alert('Game over'); done({score: Math.max(...board.flat()), time: state.elapsed}); }
+  }
+  addRandom(); addRandom(); render(); startTimer();
+  options.setKeyboardHandler((e)=>{
+    if(e.key==='ArrowLeft'){ moveLeft(); state.moves++; uiUpdate(); playSFX(400,0.04); }
+    if(e.key==='ArrowRight'){ moveRight(); state.moves++; uiUpdate(); playSFX(400,0.04); }
+    if(e.key==='ArrowUp'){ moveUp(); state.moves++; uiUpdate(); playSFX(400,0.04); }
+    if(e.key==='ArrowDown'){ moveDown(); state.moves++; uiUpdate(); playSFX(400,0.04); }
+  });
+  state.activeModal.cleanup = ()=> { stopTimer(); state.keyboardHandler = null; };
 }
 
-/* Reaction Test */
+/* ---- Reaction Test (DOM) ---- */
 function game_reaction(container, done){
-  container.innerHTML=''; stopTimer();
-  const wrap = document.createElement('div'); wrap.style.textAlign='center'; container.appendChild(wrap);
+  const parent = container.querySelector('#gameArea') || container;
+  parent.innerHTML = '';
+  const wrap = document.createElement('div'); wrap.style.textAlign='center'; parent.appendChild(wrap);
   const info = document.createElement('div'); info.className='small'; info.textContent='Wait for green then click/tap as fast as possible.'; wrap.appendChild(info);
   const target = document.createElement('div'); target.style.width='240px'; target.style.height='120px'; target.style.margin='20px auto'; target.style.borderRadius='10px'; target.style.background='tomato'; target.style.display='grid'; target.style.placeItems='center'; target.style.fontSize='22px'; target.style.cursor='pointer'; target.textContent='Wait...'; wrap.appendChild(target);
   let trials = [], stateR = {waiting:true,start:0};
-  function startTrial(){ target.style.background='tomato'; target.textContent='Wait...'; stateR.waiting=true; const delay = 800 + Math.random()*2200; setTimeout(()=>{ stateR.waiting=false; stateR.start=Date.now(); target.style.background='lime'; target.textContent='CLICK!'; }, delay); }
+  function startTrial(){
+    target.style.background='tomato'; target.textContent='Wait...'; stateR.waiting=true;
+    const delay = 700 + Math.random()*2000;
+    setTimeout(()=>{ stateR.waiting=false; stateR.start=Date.now(); target.style.background='lime'; target.textContent='CLICK!'; }, delay);
+  }
   target.addEventListener('click', ()=>{
     if(stateR.waiting){ trials.push(1000); startTrial(); return; }
     const rt = Date.now() - stateR.start;
     trials.push(rt);
     if(trials.length >= 7){
-      const sorted = trials.slice().sort((a,b)=>a-b); const median = sorted[Math.floor(sorted.length/2)];
-      stopTimer(); awardAchievement('reaction_master','Quick Reflexes'); done({score: Math.max(0,1000-median), time: median});
-      return;
+      const sorted = trials.slice().sort((a,b)=>a-b);
+      const median = sorted[Math.floor(sorted.length/2)];
+      stopTimer(); awardAchievement('reaction_master','Quick Reflexes'); done({score: Math.max(0,1000-median), time: median}); return;
     }
     startTrial();
   });
   startTimer(); startTrial();
+  state.activeModal.cleanup = ()=> { stopTimer(); };
 }
 
-/* Typing Test */
-function game_typing(container, done){
-  container.innerHTML=''; stopTimer();
-  const passage = "The quick brown fox jumps over the lazy dog. Practice makes perfect. Code, test, repeat.";
-  const wrap = document.createElement('div'); wrap.style.width='100%'; container.appendChild(wrap);
-  const pEl = document.createElement('div'); pEl.className='small'; pEl.style.marginBottom='8px'; pEl.textContent = passage; wrap.appendChild(pEl);
-  const input = document.createElement('textarea'); input.style.width='100%'; input.style.height='120px'; input.style.borderRadius='8px'; wrap.appendChild(input);
-  let started=false, startT=0;
-  input.addEventListener('input', ()=>{
-    if(!started){ started=true; startT = Date.now(); startTimer(); }
-    const typed = input.value;
-    if(typed.length >= passage.length){
-      const duration = Date.now() - startT;
-      const words = passage.split(/\s+/).length;
-      const wpm = Math.round((words / (duration/1000)) * 60);
-      const correctChars = Array.from(passage).reduce((acc,ch,i)=> acc + (typed[i]===ch?1:0), 0);
-      const accuracy = Math.round((correctChars / passage.length) * 100);
-      stopTimer(); awardAchievement('typing_speed','Typing Sprinter'); done({score: wpm * accuracy, time: duration});
-    }
-  });
-}
-
-/* Flappy */
-function game_flappy(container, done){
-  container.innerHTML=''; stopTimer();
-  const canvas = document.createElement('canvas'); canvas.width = Math.min(720, window.innerWidth-300); canvas.height = 420; container.appendChild(canvas);
+/* ---- Flappy (canvas, rAF) ---- */
+function game_flappy(container, done, options){
+  const canvas = options.canvas;
   const ctx = canvas.getContext('2d');
   let bird = {x:80,y:200,vy:0};
   const gravity = 0.6, jump = -10;
   const pipes = [];
   let tick = 0, score = 0;
+  let running = true;
   function spawnPipe(){ const gap = 120; const top = 60 + Math.random()*180; pipes.push({x:canvas.width, top, gap}); }
   function draw(){
     ctx.fillStyle = '#06111a'; ctx.fillRect(0,0,canvas.width,canvas.height);
     ctx.fillStyle = '#0f7'; pipes.forEach(p=> { ctx.fillRect(p.x,0,52,p.top); ctx.fillRect(p.x,p.top+p.gap,52,canvas.height); });
     ctx.fillStyle='yellow'; ctx.fillRect(bird.x, bird.y, 24, 18);
-    ctx.fillStyle='white'; ctx.fillText('Score: '+score, 10, 20);
+    ctx.fillStyle='white'; ctx.font='16px sans-serif'; ctx.fillText('Score: '+score, 10, 20);
   }
   function step(){
     bird.vy += gravity; bird.y += bird.vy;
     if(bird.y < 0) bird.y = 0;
-    if(bird.y > canvas.height) { clearInterval(tick); stopTimer(); alert('Crashed! Score: '+score); done({score, time: state.elapsed}); return; }
+    if(bird.y > canvas.height){ running=false; stopTimer(); playSFX(120,0.12); alert('Crashed! Score: '+score); done({score, time: state.elapsed}); return; }
     if(tick % 90 === 0) spawnPipe();
     pipes.forEach(p=> p.x -= 2.6);
     for(const p of pipes){
-      if(!p.scored && p.x + 52 < bird.x){ p.scored = true; score++; state.score = score; uiUpdate(); }
-      if(bird.x + 24 > p.x && bird.x < p.x + 52 && (bird.y < p.top || bird.y + 18 > p.top + p.gap)){ clearInterval(tick); stopTimer(); alert('Hit a pipe! Score: '+score); done({score, time: state.elapsed}); return; }
+      if(!p.scored && p.x + 52 < bird.x){ p.scored = true; score++; state.score = score; uiUpdate(); playSFX(1000,0.06); }
+      if(bird.x + 24 > p.x && bird.x < p.x + 52 && (bird.y < p.top || bird.y + 18 > p.top + p.gap)){ running=false; stopTimer(); playSFX(120,0.12); alert('Hit a pipe! Score: '+score); done({score, time: state.elapsed}); return; }
     }
     while(pipes.length && pipes[0].x < -60) pipes.shift();
     draw(); tick++;
+    if(running) requestAnimationFrame(step);
   }
-  function flap(){ bird.vy = jump; playTone(880,0.04); }
-  window.addEventListener('keydown', onKey);
+  function flap(){ bird.vy = jump; playSFX(880,0.04); }
+  options.setKeyboardHandler((e)=>{ if(e.code==='Space') flap(); });
   canvas.addEventListener('click', flap);
-  function onKey(e){ if(e.code==='Space') flap(); }
-  startTimer(); tick = setInterval(step, 28);
-  setTimeout(()=>{ clearInterval(tick); window.removeEventListener('keydown', onKey); done({score, time: state.elapsed}); }, 180000);
+  startTimer(); requestAnimationFrame(step);
+  state.activeModal.cleanup = ()=> { running=false; stopTimer(); state.keyboardHandler = null; canvas.removeEventListener('click', flap); };
 }
 
-/* -------------------------
-   utils
-   ------------------------- */
-function rand(n){ return Math.floor(Math.random()*n); }
-function shuffle(a){ const arr = a.slice(); for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]] } return arr; }
+/* ---------------------------
+   End of game implementations
+   --------------------------- */
 
-/* -------------------------
-   Startup / UI wiring
-   ------------------------- */
+/* ---------------------------
+   UI small controls and events
+   --------------------------- */
+howBtn.addEventListener('click', ()=>{
+  const g = GAMES.find(x=>x.id===state.currentGameId);
+  if(!g) return alert('Select a game first.');
+  showHow(g);
+});
+leaderBtn.addEventListener('click', ()=>{
+  const id = state.currentGameId;
+  if(!id) return alert('Select a game first.');
+  subscribeLiveLeaderboard(id);
+  alert('Live leaderboard updated in the right panel.');
+});
+globalInfo.addEventListener('click', ()=> {
+  showModal(`<h3>About Dev Arcade Ultimate</h3><p class="small">Single-file arcade with modal play, anonymous + email auth, realtime leaderboards, offline queue, and high-performance games. Convert guest accounts to email to keep your scores.</p>`);
+});
+exportBtn.addEventListener('click', ()=>{
+  const data = localStorage.getItem('devarcade_local') || '{}';
+  const blob = new Blob([data], {type:'application/json'}); const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'devarcade-local.json'; a.click(); URL.revokeObjectURL(url);
+});
+importBtn.addEventListener('click', ()=>{
+  const inp = document.createElement('input'); inp.type='file'; inp.accept='.json';
+  inp.addEventListener('change', e=>{
+    const f = e.target.files[0]; if(!f) return;
+    const reader = new FileReader();
+    reader.onload = ()=> {
+      try{ const obj = JSON.parse(reader.result); localStorage.setItem('devarcade_local', JSON.stringify(obj)); state.localScores = obj; alert('Imported local scores.'); uiUpdate(); }catch(e){ alert('Invalid file'); }
+    };
+    reader.readAsText(f);
+  });
+  inp.click();
+});
+
+/* ---------------------------
+   Startup
+   --------------------------- */
 selectGame(GAMES[0].id);
 uiUpdate();
 window.addEventListener('online', syncPending);
 
-function selectGame(id){ /* defined earlier behavior */ const g = GAMES.find(x=>x.id===id); if(!g) return; state.currentGameId = id; state.score=0; state.moves=0; state.elapsed=0; uiUpdate(); $$('.card').forEach(c=> c.style.outline = (c.dataset.id===id) ? '2px solid rgba(155,92,255,0.25)' : 'none'); stageInner.innerHTML = `<div style="text-align:center;width:100%"><h3 style="margin:0">${g.name}</h3><p class="small">${g.desc}</p><div style="height:12px"></div><div style="display:flex;gap:8px;justify-content:center"><button class="btn" id="playBtn">Play</button><button class="btn ghost" id="howPlay">How</button><button class="btn ghost" id="liveBtn">Live Board</button></div></div>`; document.getElementById('playBtn').addEventListener('click', ()=> startGame(id)); document.getElementById('howPlay').addEventListener('click', ()=> showHow(g)); document.getElementById('liveBtn').addEventListener('click', ()=> { subscribeLiveLeaderboard(id); alert('Live leaderboard updated on the right'); }); subscribeLiveLeaderboard(id); }
+/* ---------------------------
+   End of file
+   --------------------------- */
 
 </script>
 </body>
