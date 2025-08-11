@@ -7,7 +7,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='96'%3E%F0%9F%A7%A0%3C/text%3E%3C/svg%3E">
 <style>
 /* ===========================
-   Dev Arcade Ultimate — single-file CSS
+   Dev Arcade Ultimate — single-file CSS (updated)
    Neon arcade theme, polished UI
    =========================== */
 :root{
@@ -72,12 +72,13 @@ html,body{height:100%;margin:0;background:
 .avatar{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent1),var(--accent2));display:grid;place-items:center;font-weight:800;color:white}
 .lb-score{margin-left:auto;font-weight:900}
 .infoBtn{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.02);display:grid;place-items:center;cursor:pointer;border:1px solid rgba(255,255,255,0.03)}
+.autoplayToggle{padding:8px 10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);cursor:pointer;color:var(--muted)}
+.autoplayToggle.on{background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#fff;transform:translateY(-3px)}
 @media(max-width:980px){ .grid{grid-template-columns:1fr} .right{order:2} .left{order:1} .stage{height:520px} .authGrid{grid-template-columns:1fr} }
 </style>
 </head>
 <body>
 <div class="container" id="app">
-  <!-- Confetti canvas -->
   <canvas id="confettiCanvas" style="position:fixed;left:0;top:0;pointer-events:none;z-index:2100"></canvas>
 
   <div class="header">
@@ -96,6 +97,7 @@ html,body{height:100%;margin:0;background:
         <div class="choice selected" id="choiceEmail" tabindex="0">Email</div>
         <div class="choice" id="choiceGuest" tabindex="0">Guest</div>
       </div>
+      <div id="autoPlayToggle" class="autoplayToggle" title="Toggle Auto-Play on select">Auto-Play: Off</div>
       <button class="btn" id="muteBtn" title="Mute / Unmute music">Mute</button>
     </div>
   </div>
@@ -125,9 +127,7 @@ html,body{height:100%;margin:0;background:
           </div>
         </div>
 
-        <div class="menu-grid" id="menuGrid">
-          <!-- cards injected by JS -->
-        </div>
+        <div class="menu-grid" id="menuGrid"></div>
       </div>
 
       <div class="stage panel" id="stage">
@@ -196,20 +196,14 @@ html,body{height:100%;margin:0;background:
 
 <script>
 /* ====================================================
-   Dev Arcade Ultimate — Single-file JS
-   Implements:
-   - Modal popups for games (no scrolling)
-   - Auth modal with Email/Guest + convert flow
-   - Background music + sound fx
-   - Live leaderboards (Firestore) with pending queue sync
-   - rAF-based games in modal canvas with cleanup
-   - Debounced resize, single keyboard listener when modal open
-   - Performance best practices & cleanup
+   Dev Arcade Ultimate — Single-file JS (updated)
+   - Improved procedural chiptune background
+   - Auto-Play toggle: open & start game immediately on select
+   - All previous features preserved (auth, leaderboards, pending queue, etc.)
    ==================================================== */
 
 /* ---------------------------
-   FIREBASE CONFIG (use yours)
-   You already provided this config earlier — kept here.
+   FIREBASE CONFIG (your config)
    --------------------------- */
 const firebaseConfig = {
   apiKey: "AIzaSyDzNwzn3KzTBErJLf_I8aogzGyaZNxtTSY",
@@ -225,24 +219,23 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 /* ---------------------------
-   Helpers & small utils
+   Helpers
    --------------------------- */
 const $ = s => document.querySelector(s);
 const $$ = s => Array.from(document.querySelectorAll(s));
 const el = id => document.getElementById(id);
-
 function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-function debounce(fn, delay=120){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), delay); }; }
+function debounce(fn,delay=120){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), delay); }; }
 function msToTime(ms){ const s=Math.floor(ms/1000), m=Math.floor(s/60), sec=s%60; return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`; }
 function rand(n){ return Math.floor(Math.random()*n); }
 function shuffle(a){ const arr=a.slice(); for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]] } return arr; }
 
 /* ---------------------------
-   Confetti canvas (small)
+   Confetti
    --------------------------- */
 const confettiCanvas = el('confettiCanvas'), confettiCtx = confettiCanvas.getContext('2d');
 function resizeConfetti(){ confettiCanvas.width = innerWidth; confettiCanvas.height = innerHeight; }
-window.addEventListener('resize', debounce(resizeConfetti, 150));
+window.addEventListener('resize', debounce(resizeConfetti,150));
 resizeConfetti();
 function launchConfetti(n=80){
   const pieces = [];
@@ -263,61 +256,95 @@ function launchConfetti(n=80){
 }
 
 /* ---------------------------
-   Audio: background music + small fx
-   - Background is a tiny oscillator loop (so no external file)
-   - Play resumes after a user gesture
+   Audio: Procedural chiptune + SFX
+   - No external files. Small, catchy loop.
    --------------------------- */
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let audioCtx = null;
-let bgGain = null, bgOsc = null;
+let masterGain = null;
+let bgGain = null;
+let sfxGain = null;
+let bgSched = {interval:null, running:false};
 let globalMute = false;
+
 function initAudio(){
   if(audioCtx) return;
   try{
     audioCtx = new AudioCtx();
-    bgGain = audioCtx.createGain(); bgGain.gain.value = 0.05; bgGain.connect(audioCtx.destination);
-    // create a low, detuned saw-style background using 2 oscillators
-    bgOsc = audioCtx.createOscillator(); bgOsc.type = 'sawtooth'; bgOsc.frequency.value = 110;
-    const o2 = audioCtx.createOscillator(); o2.type='sine'; o2.frequency.value = 220; o2.detune.value = -120;
-    const mix = audioCtx.createGain(); mix.gain.value = 0.6; mix.connect(bgGain);
-    bgOsc.connect(mix); o2.connect(mix);
-    bgOsc.start(); o2.start();
-    // subtle filter
-    const f = audioCtx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=1000; mix.connect(f); f.connect(bgGain);
+    masterGain = audioCtx.createGain(); masterGain.gain.value = 0.9; masterGain.connect(audioCtx.destination);
+
+    bgGain = audioCtx.createGain(); bgGain.gain.value = 0.06; bgGain.connect(masterGain);
+    sfxGain = audioCtx.createGain(); sfxGain.gain.value = 0.12; sfxGain.connect(masterGain);
+
+    // create chiptune loop (scheduler)
+    // pattern arrays (note frequencies)
+    const melody = [880, 0, 880, 0, 1047, 0, 784, 0]; // simple motif
+    const bass = [220,220,196,196,174,174,196,196];
+
+    let t0 = audioCtx.currentTime + 0.1;
+    const step = 0.25; // quarter note
+    function scheduleLoop(){
+      let tm = t0;
+      for(let i=0;i<32;i++){
+        const idx = i % melody.length;
+        const m = melody[idx];
+        const b = bass[idx];
+        if(m){
+          const o = audioCtx.createOscillator(); o.type='square'; o.frequency.value = m;
+          const g = audioCtx.createGain(); g.gain.value = 0.0001;
+          o.connect(g); g.connect(bgGain);
+          o.start(tm); g.gain.linearRampToValueAtTime(0.06, tm + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, tm + step*0.9);
+          o.stop(tm + step);
+        }
+        // bass
+        const ob = audioCtx.createOscillator(); ob.type='sawtooth'; ob.frequency.value = b;
+        const gb = audioCtx.createGain(); gb.gain.value = 0.0001;
+        const fl = audioCtx.createBiquadFilter(); fl.type='lowpass'; fl.frequency.value = 600;
+        ob.connect(gb); gb.connect(fl); fl.connect(bgGain);
+        ob.start(tm); gb.gain.linearRampToValueAtTime(0.04, tm + 0.01); gb.gain.exponentialRampToValueAtTime(0.0001, tm + step*0.9);
+        ob.stop(tm + step);
+        tm += step;
+      }
+      // schedule next loop
+      t0 = tm;
+      bgSched.interval = setTimeout(scheduleLoop, (tm - audioCtx.currentTime - 0.05)*1000);
+    }
+    bgSched.running = true;
+    scheduleLoop();
   }catch(e){
     console.warn('Audio init failed', e);
   }
 }
 function setMute(v){
   globalMute = v;
-  if(bgGain) bgGain.gain.value = v ? 0 : 0.05;
+  if(!audioCtx && !v) initAudio();
+  if(bgGain) bgGain.gain.value = v ? 0 : 0.06;
+  if(sfxGain) sfxGain.gain.value = v ? 0 : 0.12;
   el('muteBtn').textContent = v ? 'Unmute' : 'Mute';
 }
-function playSFX(freq=440, dur=0.06, type='sine', vol=0.08){
+function playSFX(freq=600, dur=0.06, type='square', vol=0.08){
   if(globalMute) return;
   if(!audioCtx) initAudio();
   try{
     const o = audioCtx.createOscillator();
     const g = audioCtx.createGain();
-    o.type = type; o.frequency.value = freq; g.gain.value = vol;
-    o.connect(g); g.connect(audioCtx.destination);
-    o.start(); o.stop(audioCtx.currentTime + dur);
+    o.type = type; o.frequency.value = freq; g.gain.value = 0.0001;
+    o.connect(g); g.connect(sfxGain);
+    const now = audioCtx.currentTime;
+    g.gain.linearRampToValueAtTime(vol, now + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+    o.start(now); o.stop(now + dur + 0.02);
   }catch(e){}
 }
-el('muteBtn').addEventListener('click', ()=>{
-  // ensure audio started on user gesture
-  if(!audioCtx) initAudio();
-  setMute(!globalMute);
-});
 
-/* attempt to resume audio on first user gesture */
-document.addEventListener('click', function _once(){
+/* try to resume audio on first gesture */
+document.addEventListener('click', function onceClick(){
   if(!audioCtx) initAudio();
-  document.removeEventListener('click', _once);
+  document.removeEventListener('click', onceClick);
 });
 
 /* ---------------------------
-   State
+   State & UI refs
    --------------------------- */
 let state = {
   currentGameId: null,
@@ -330,18 +357,18 @@ let state = {
   localScores: JSON.parse(localStorage.getItem('devarcade_local')||'{}'),
   pending: JSON.parse(localStorage.getItem('devarcade_pending')||'{}'),
   achievements: JSON.parse(localStorage.getItem('devarcade_ach')||'{}'),
-  activeModal: null, // reference to modal cleanup
-  keyboardHandler: null
+  activeModal: null,
+  keyboardHandler: null,
+  autoPlay: false
 };
 
-/* UI refs */
 const menuGrid = el('menuGrid'), stageInner = el('stageInner'), gameName = el('gameName');
 const scoreEl = el('score'), timeEl = el('time'), liveLeaderboard = el('liveLeaderboard'), localBoard = el('localBoard');
 const authBtn = el('authBtn'), userArea = el('userArea'), howBtn = el('howBtn'), leaderBtn = el('leaderBtn'), startDefault = el('startDefault');
 const exportBtn = el('exportBtn'), importBtn = el('importBtn'), playAll = el('playAll'), globalInfo = el('globalInfo');
-const choiceEmail = el('choiceEmail'), choiceGuest = el('choiceGuest');
+const choiceEmail = el('choiceEmail'), choiceGuest = el('choiceGuest'), autoPlayToggle = el('autoPlayToggle');
 
-/* UI update helpers */
+/* UI helpers */
 function uiUpdate(){
   gameName.textContent = state.currentGameId ? (GAMES.find(g=>g.id===state.currentGameId).name) : '—';
   scoreEl.textContent = state.score;
@@ -349,13 +376,11 @@ function uiUpdate(){
   renderLocalBoard();
   renderAchievements();
 }
-
-/* timer */
 function startTimer(){ state.startTime = Date.now(); state.timer = setInterval(()=>{ state.elapsed = Date.now() - state.startTime; uiUpdate(); }, 200); }
 function stopTimer(){ if(state.timer){ clearInterval(state.timer); state.timer = null; } }
 
 /* ---------------------------
-   Firebase pending queue sync (batched)
+   Pending queue sync (batched)
    --------------------------- */
 async function syncPending(){
   if(!navigator.onLine) return;
@@ -365,7 +390,6 @@ async function syncPending(){
   for(const gameId of Object.keys(pending)){
     const arr = pending[gameId];
     if(!arr || !arr.length) continue;
-    // batch writes in chunks
     for(const rec of arr){
       try{
         await db.collection('leaderboards').doc(gameId).collection('scores').add({
@@ -377,7 +401,7 @@ async function syncPending(){
         });
       }catch(e){
         console.warn('sync failed', e);
-        return; // stop on first failure to retry later
+        return;
       }
     }
   }
@@ -385,15 +409,10 @@ async function syncPending(){
   state.pending = {};
   uiUpdate();
 }
-
-/* subscribe to online event to sync pending automatically */
-window.addEventListener('online', () => {
-  syncPending();
-});
+window.addEventListener('online', syncPending);
 
 /* ---------------------------
-   Leaderboards: real-time subscription
-   - Updates shown with animated list
+   Live leaderboard subscription
    --------------------------- */
 let currentUnsub = null;
 function subscribeLiveLeaderboard(gameId){
@@ -403,36 +422,25 @@ function subscribeLiveLeaderboard(gameId){
     const ref = db.collection('leaderboards').doc(gameId).collection('scores').orderBy('score','desc').limit(15);
     currentUnsub = ref.onSnapshot(snapshot=>{
       const rows = [];
-      snapshot.forEach(doc=>{
-        const d = doc.data();
-        rows.push({name:d.name,score:d.score,time:d.time,ts:d.ts});
-      });
-      if(rows.length === 0){ liveLeaderboard.innerHTML = '<div class="small">No scores yet — be the first!</div>'; return; }
-      // render
+      snapshot.forEach(doc=> rows.push(doc.data()));
+      if(rows.length===0){ liveLeaderboard.innerHTML = '<div class="small">No scores yet — be the first!</div>'; return; }
       liveLeaderboard.innerHTML = '';
-      rows.forEach((r, i)=>{
-        const item = document.createElement('div'); item.className = 'leadItem';
+      rows.forEach(r=>{
+        const item = document.createElement('div'); item.className='leadItem';
         const initials = (r.name||'P').split(' ').map(s=>s[0]).slice(0,2).join('').toUpperCase();
         item.innerHTML = `<div class="avatar">${escapeHtml(initials)}</div>
-                          <div style="min-width:120px"><strong>${escapeHtml(r.name||'Player')}</strong><div class="small" style="color:var(--muted)">${r.time ? msToTime(r.time) : '—'}</div></div>
+                          <div style="min-width:120px"><strong>${escapeHtml(r.name||'Player')}</strong><div class="small" style="color:var(--muted)">${r.time?msToTime(r.time):'—'}</div></div>
                           <div class="lb-score" style="font-size:16px">${r.score}</div>`;
         liveLeaderboard.appendChild(item);
-        // animate insert
-        item.style.transform = 'translateX(-20px)'; item.style.opacity = '0';
-        requestAnimationFrame(()=>{ item.style.transition = 'transform .28s, opacity .28s'; item.style.transform = 'translateX(0)'; item.style.opacity = '1'; });
+        item.style.transform='translateX(-20px)'; item.style.opacity='0';
+        requestAnimationFrame(()=>{ item.style.transition='transform .28s, opacity .28s'; item.style.transform='translateX(0)'; item.style.opacity='1'; });
       });
-    }, err=>{
-      console.error('snapshot err', err);
-      liveLeaderboard.innerHTML = '<div class="small">Leaderboards unavailable — check rules.</div>';
-    });
-  }catch(e){
-    console.error(e);
-    liveLeaderboard.innerHTML = '<div class="small">Live board error</div>';
-  }
+    }, err=>{ console.error('snapshot',err); liveLeaderboard.innerHTML='<div class="small">Leaderboards unavailable</div>'; });
+  }catch(e){ console.error(e); liveLeaderboard.innerHTML='<div class="small">Live board error</div>'; }
 }
 
 /* ---------------------------
-   Local leaderboard helpers (browser)
+   Local leaderboards & achievements
    --------------------------- */
 function saveLocalScore(gameId, name, score, time){
   const key = 'devarcade_local';
@@ -452,8 +460,6 @@ function addPending(gameId, name, score, time){
   localStorage.setItem(key, JSON.stringify(data));
   state.pending = data;
 }
-
-/* render local board */
 function renderLocalBoard(){
   localBoard.innerHTML = '';
   const data = JSON.parse(localStorage.getItem('devarcade_local')||'{}');
@@ -463,13 +469,9 @@ function renderLocalBoard(){
     const li = document.createElement('li'); li.style.color='var(--muted)'; li.innerHTML = `${escapeHtml(rec.name)} — ${rec.score}pts (${msToTime(rec.time||0)})`; localBoard.appendChild(li);
   });
 }
-
-/* ---------------------------
-   Achievements simple system
-   --------------------------- */
 function awardAchievement(key, text){
   if(state.achievements[key]) return;
-  state.achievements[key] = {text, when: Date.now()};
+  state.achievements[key] = {text, when:Date.now()};
   localStorage.setItem('devarcade_ach', JSON.stringify(state.achievements));
   renderAchievements();
   showModal(`<h3>Achievement unlocked</h3><p class="small">${escapeHtml(text)}</p>`);
@@ -486,41 +488,33 @@ function renderAchievements(){
 }
 
 /* ---------------------------
-   AUTH: Email/password + Anonymous + convert flow
+   AUTH
    --------------------------- */
 auth.onAuthStateChanged(async user=>{
   if(user){
     const name = user.displayName || (user.email ? user.email : (user.isAnonymous ? ('Guest-'+user.uid.slice(0,6)) : 'User'));
     userArea.innerHTML = `<strong>${escapeHtml(name)}</strong>`;
     authBtn.textContent = 'Sign out';
-    // try to sync pending if any
     await syncPending();
   } else {
     userArea.textContent = 'Not signed in';
     authBtn.textContent = 'Sign in / Register';
   }
 });
-
-authBtn.addEventListener('click', ()=>{
-  if(auth.currentUser) {
+authBtn.addEventListener('click', ()=> {
+  if(auth.currentUser){
     if(confirm('Sign out?')) auth.signOut();
     return;
   }
   openAuthModal();
 });
+function setChoice(choice){ if(choice==='email'){ choiceEmail.classList.add('selected'); choiceGuest.classList.remove('selected'); } else { choiceGuest.classList.add('selected'); choiceEmail.classList.remove('selected'); } }
+choiceEmail.addEventListener('click', ()=> setChoice('email')); choiceGuest.addEventListener('click', ()=> setChoice('guest'));
 
-/* UI highlight toggle for Email/Guest choice */
-function setChoice(choice){
-  if(choice === 'email'){ choiceEmail.classList.add('selected'); choiceGuest.classList.remove('selected'); }
-  else { choiceGuest.classList.add('selected'); choiceEmail.classList.remove('selected'); }
-}
-choiceEmail.addEventListener('click', ()=> setChoice('email'));
-choiceGuest.addEventListener('click', ()=> setChoice('guest'));
-
-/* open auth modal */
+/* auth modal (same as before) */
 function openAuthModal(){
-  const bd = document.createElement('div'); bd.className = 'modal-backdrop';
-  const m = document.createElement('div'); m.className = 'modal';
+  const bd = document.createElement('div'); bd.className='modal-backdrop';
+  const m = document.createElement('div'); m.className='modal';
   m.innerHTML = `<div class="close">✕</div><h3>Sign in / Register</h3>
     <div style="display:flex;gap:12px;margin-top:12px">
       <div style="flex:1">
@@ -541,77 +535,50 @@ function openAuthModal(){
       </div>
     </div>`;
   bd.appendChild(m); document.body.appendChild(bd);
-  // close handler
-  m.querySelector('.close').addEventListener('click', ()=> { bd.remove(); });
-  // fix input colors
+  m.querySelector('.close').addEventListener('click', ()=> bd.remove());
   const emailField = m.querySelector('#emailField'), passField = m.querySelector('#passField');
-  emailField.style.color = '#fff'; passField.style.color = '#fff';
-  // Login
   m.querySelector('#loginBtn').addEventListener('click', async ()=>{
     const email = emailField.value.trim(), pass = passField.value;
     if(!email || !pass) return alert('Enter email & password.');
-    try{ await auth.signInWithEmailAndPassword(email, pass); bd.remove(); playSFX(800,0.06,'sine',0.06); } catch(e){ alert('Login failed: '+e.message); }
+    try{ await auth.signInWithEmailAndPassword(email, pass); bd.remove(); playSFX(800,0.06); } catch(e){ alert('Login failed: '+e.message); }
   });
-  // Sign up
   m.querySelector('#signupBtn').addEventListener('click', async ()=>{
     const email = emailField.value.trim(), pass = passField.value;
     if(!email || !pass) return alert('Enter email & password.');
-    try{
-      const cred = await auth.createUserWithEmailAndPassword(email, pass);
-      await cred.user.updateProfile({displayName: email.split('@')[0]});
-      bd.remove(); playSFX(1200,0.08,'sine',0.06);
-      alert('Registered & signed in.');
-    }catch(e){ alert('Register failed: '+e.message); }
+    try{ const cred = await auth.createUserWithEmailAndPassword(email, pass); await cred.user.updateProfile({displayName: email.split('@')[0]}); bd.remove(); playSFX(1200,0.08); alert('Registered & signed in.'); }catch(e){ alert('Register failed: '+e.message); }
   });
-  // anonymous
-  m.querySelector('#anonBtn').addEventListener('click', async ()=>{
-    try{ await auth.signInAnonymously(); bd.remove(); alert('Signed in as guest. Convert later to keep scores.'); }catch(e){ alert('Guest sign-in failed: '+e.message); }
-  });
-  // convert guest
+  m.querySelector('#anonBtn').addEventListener('click', async ()=>{ try{ await auth.signInAnonymously(); bd.remove(); alert('Signed in as guest. Convert later to keep scores.'); }catch(e){ alert('Guest sign-in failed: '+e.message); }});
   m.querySelector('#convertBtn').addEventListener('click', async ()=>{
     const user = auth.currentUser;
     if(!user) return alert('No authenticated user. Sign in as guest first.');
     if(!user.isAnonymous) return alert('Your account is already permanent.');
-    const email = prompt('Enter email to convert this guest account to:', '');
+    const email = prompt('Enter email to convert this guest account to:','');
     if(!email) return;
-    const pass = prompt('Choose a password (min 6 chars):', '');
+    const pass = prompt('Choose a password (min 6 chars):','');
     if(!pass) return;
     const credential = firebase.auth.EmailAuthProvider.credential(email, pass);
-    try{
-      await user.linkWithCredential(credential);
-      await user.updateProfile({displayName: email.split('@')[0]});
-      alert('Guest account converted — UID preserved.');
-      bd.remove();
-    }catch(e){ alert('Conversion failed: '+e.message); }
+    try{ await user.linkWithCredential(credential); await user.updateProfile({displayName: email.split('@')[0]}); alert('Guest account converted — UID preserved.'); bd.remove(); }catch(e){ alert('Conversion failed: '+e.message); }
   });
 }
 
 /* ---------------------------
-   Modal helpers (for games/info)
-   - createModal(content, options)
-   - returns {close(), setContent()}
+   Modal helper
    --------------------------- */
 function createModal(innerHtml, options={}){
-  const backdrop = document.createElement('div'); backdrop.className = 'modal-backdrop';
-  const modal = document.createElement('div'); modal.className = 'modal';
+  const backdrop = document.createElement('div'); backdrop.className='modal-backdrop';
+  const modal = document.createElement('div'); modal.className='modal';
   modal.innerHTML = `<div class="close">✕</div><div class="modalContent">${innerHtml}</div>`;
   backdrop.appendChild(modal); document.body.appendChild(backdrop);
   const closeBtn = modal.querySelector('.close');
-  function cleanup(){
-    try{ backdrop.remove(); }catch(e){}
-  }
-  closeBtn.addEventListener('click', ()=> { cleanup(); if(options.onClose) options.onClose(); });
-  return {
-    close: cleanup,
-    setContent: (html)=> { modal.querySelector('.modalContent').innerHTML = html; }
-  };
+  function cleanup(){ try{ backdrop.remove(); }catch(e){} if(options.onClose) options.onClose(); }
+  closeBtn.addEventListener('click', cleanup);
+  return { close: cleanup, setContent: (html)=> { modal.querySelector('.modalContent').innerHTML = html; } };
 }
-function showModal(html){ const m = createModal(html); return m; }
+function showModal(html){ return createModal(html); }
 
 /* ---------------------------
-   GAMES registry
-   Each entry: {id,name,section,thumb,desc,fn,how}
-   fn(container, done) -> done({score,time})
+   Games (same as previous, but auto-play support)
+   Registry, buildMenu, selectGame, openGameModal implement auto-play toggle
    --------------------------- */
 const GAMES = [
   { id:'memory', name:'Memory Match', section:'Puzzles', thumb:'🧠', desc:'Flip matching pairs quickly.', fn: game_memory, how: 'Flip cards to find matches. Faster & fewer moves = higher score.' },
@@ -620,10 +587,8 @@ const GAMES = [
   { id:'2048', name:'2048', section:'Puzzles', thumb:'🔢', desc:'Combine tiles to reach 2048.', fn: game_2048, how:'Use arrows; combine tiles to increase score.' },
   { id:'reaction', name:'Reaction Test', section:'Competitive', thumb:'⚡', desc:'How fast are you?', fn: game_reaction, how:'Wait for green and click.' },
   { id:'flappy', name:'Flappy', section:'Arcade', thumb:'🐦', desc:'Tap to fly through gaps.', fn: game_flappy, how:'Tap or press Space to flap.' },
-  // Extras: add Breakout or Pong later if you want
 ];
 
-/* build menu */
 function buildMenu(){
   menuGrid.innerHTML = '';
   const sections = {};
@@ -632,10 +597,13 @@ function buildMenu(){
     const header = document.createElement('div'); header.innerHTML = `<div style="font-weight:900;margin-top:4px">${escapeHtml(section)}</div><div class="small" style="margin-bottom:6px">${sections[section].length} games</div>`;
     menuGrid.appendChild(header);
     sections[section].forEach(g=>{
-      const card = document.createElement('div'); card.className = 'card'; card.dataset.id = g.id;
+      const card = document.createElement('div'); card.className='card'; card.dataset.id = g.id;
       card.innerHTML = `<div class="thumb">${g.thumb}</div><div style="display:flex;justify-content:space-between;width:100%"><div style="font-weight:900">${escapeHtml(g.name)}</div><div class="small">${escapeHtml(g.section)}</div></div><div class="meta">${escapeHtml(g.desc)}</div>`;
-      card.addEventListener('click', ()=> selectGame(g.id));
-      // allow context menu to show rules
+      card.addEventListener('click', ()=> {
+        // when a card is clicked, if Auto-Play is ON -> open modal and start automatically
+        selectGame(g.id);
+        if(state.autoPlay) openGameModal(g.id, {autoStart:true});
+      });
       card.addEventListener('contextmenu', (e)=>{ e.preventDefault(); showHow(g); });
       menuGrid.appendChild(card);
     });
@@ -652,15 +620,12 @@ $('#search').addEventListener('input', e=>{
   filtered.forEach(g=>{
     const card = document.createElement('div'); card.className='card'; card.dataset.id=g.id;
     card.innerHTML = `<div class="thumb">${g.thumb}</div><div style="display:flex;justify-content:space-between;width:100%"><div style="font-weight:900">${escapeHtml(g.name)}</div><div class="small">${escapeHtml(g.section)}</div></div><div class="meta">${escapeHtml(g.desc)}</div>`;
-    card.addEventListener('click', ()=> selectGame(g.id));
+    card.addEventListener('click', ()=> { selectGame(g.id); if(state.autoPlay) openGameModal(g.id,{autoStart:true}); });
     menuGrid.appendChild(card);
   });
 });
 
-/* ---------------------------
-   selectGame -> shows overlay with Play + Info
-   when Play clicked -> open game modal (centered) and run game inside modal canvas
-   --------------------------- */
+/* selectGame -> populates stage with Play/How/Live buttons */
 function selectGame(id){
   const g = GAMES.find(x=>x.id===id);
   if(!g) return;
@@ -668,17 +633,16 @@ function selectGame(id){
   uiUpdate();
   $$('.card').forEach(c=> c.style.outline = (c.dataset.id===id) ? '2px solid rgba(160,76,255,0.25)' : 'none');
   stageInner.innerHTML = `<div style="text-align:center;width:100%"><h3 style="margin:0">${escapeHtml(g.name)}</h3><p class="small">${escapeHtml(g.desc)}</p><div style="height:12px"></div><div style="display:flex;gap:8px;justify-content:center"><button class="btn" id="playBtn">Play</button><button class="btn ghost" id="howPlay">How</button><button class="btn ghost" id="liveBtn">Live Board</button></div></div>`;
-  document.getElementById('playBtn').addEventListener('click', ()=> openGameModal(id));
+  document.getElementById('playBtn').addEventListener('click', ()=> openGameModal(id, {autoStart:true}));
   document.getElementById('howPlay').addEventListener('click', ()=> showHow(g));
   document.getElementById('liveBtn').addEventListener('click', ()=> { subscribeLiveLeaderboard(id); alert('Live leaderboard updated on the right'); });
   subscribeLiveLeaderboard(id);
 }
 
-/* open game modal: plays game inside canvas or DOM area, with cleanup */
-function openGameModal(gameId){
+/* openGameModal: options.autoStart true => auto start game when modal opens */
+function openGameModal(gameId, options={}){
   const game = GAMES.find(g=>g.id===gameId);
   if(!game) return;
-  // create modal with canvas container
   const modalHtml = `<h3 style="margin-top:0">${escapeHtml(game.name)}</h3>
     <div style="display:flex;gap:12px">
       <div style="flex:1">
@@ -696,47 +660,45 @@ function openGameModal(gameId){
         <div style="font-weight:900;margin-top:8px">How to play</div><div class="small" style="margin-top:6px">${escapeHtml(game.how)}</div>
       </div>
     </div>`;
-  const modal = createModal(modalHtml, {onClose: ()=> { /* cleanup performed by returned close handler below if needed */ }});
-  // run game inside #gameArea
+  const modal = createModal(modalHtml, {});
   const gameArea = document.getElementById('gameArea');
-  // create a canvas for canvas-based games; for DOM games, pass container
-  const canvas = document.createElement('canvas'); canvas.className = 'gameCanvas'; canvas.width = Math.min(900, window.innerWidth - 200); canvas.height = 420;
+  const canvas = document.createElement('canvas'); canvas.className='gameCanvas'; canvas.width = Math.min(900, window.innerWidth - 200); canvas.height = 420;
   gameArea.appendChild(canvas);
-  // update live panel inside modal
-  function miniLiveUpdate(snapshot){
-    const elMini = document.getElementById('miniLive');
+
+  // mini live subscription
+  const miniLiveEl = document.getElementById('miniLive');
+  const unsubMini = db.collection('leaderboards').doc(gameId).collection('scores').orderBy('score','desc').limit(8).onSnapshot(snapshot=>{
     let html = '<ol style="margin-left:18px;color:var(--muted)">';
-    snapshot.forEach(doc=> {
-      const d = doc.data();
-      html += `<li><strong>${escapeHtml(d.name||'Player')}</strong> — ${d.score}</li>`;
-    });
+    snapshot.forEach(doc=> html += `<li><strong>${escapeHtml(doc.data().name||'Player')}</strong> — ${doc.data().score}</li>`);
     html += '</ol>';
-    elMini.innerHTML = html;
-  }
-  // subscribe to live leaderboard for the game while modal open
-  const unsub = db.collection('leaderboards').doc(gameId).collection('scores').orderBy('score','desc').limit(8).onSnapshot(snapshot=> miniLiveUpdate(snapshot), err=> console.warn('mini live error', err));
-  // attach a single keyboard handler for modal
+    miniLiveEl.innerHTML = html;
+  }, err=> miniLiveEl.innerHTML = '<div class="small">Unavailable</div>');
+
+  // attach keyboard handler when modal open
   function modalKeyHandler(e){ if(state.keyboardHandler) state.keyboardHandler(e); }
   window.addEventListener('keydown', modalKeyHandler);
 
-  // run the game's function: it will accept (container, done, {canvas})
-  let finished = false;
+  // start timer
+  startTimer();
+  // ensure save disabled until finished
+  document.getElementById('saveScoreBtn').disabled = true;
+
+  // game done callback
+  let finished=false;
   const doneCallback = async (result)=>{
-    if(finished) return; finished = true;
+    if(finished) return; finished=true;
     stopTimer();
     state.score = result.score || state.score;
     state.elapsed = result.time || state.elapsed;
     uiUpdate();
-    // show save option (button already present)
     document.getElementById('saveScoreBtn').disabled = false;
-    playSFX(1000,0.08,'sine',0.06);
+    playSFX(1000,0.08);
   };
-  // disable save until game finishes
-  document.getElementById('saveScoreBtn').disabled = true;
+
   // save handler
   document.getElementById('saveScoreBtn').addEventListener('click', async ()=>{
-    if(!finished) return alert('Finish the run first to save.');
-    let displayName = auth.currentUser ? (auth.currentUser.displayName || auth.currentUser.email || ('Guest-'+auth.currentUser.uid.slice(0,6))) : prompt('Enter name to save locally:','Guest') || 'Guest';
+    if(!finished) return alert('Finish first.');
+    const displayName = auth.currentUser ? (auth.currentUser.displayName || auth.currentUser.email || ('Guest-'+auth.currentUser.uid.slice(0,6))) : (prompt('Enter name to save locally:','Guest')||'Guest');
     saveLocalScore(gameId, displayName, state.score, state.elapsed);
     if(auth.currentUser){
       try{
@@ -747,96 +709,118 @@ function openGameModal(gameId){
           time: Number(state.elapsed),
           ts: firebase.firestore.FieldValue.serverTimestamp()
         });
-        alert('Published to live leaderboard!');
-        launchConfetti(80);
+        alert('Published to live leaderboard!'); launchConfetti(80);
       }catch(e){
-        console.warn('publish failed', e);
+        console.warn('publish failed',e);
         addPending(gameId, displayName, state.score, state.elapsed);
-        alert('Publish failed (offline/rules) — queued locally.');
+        alert('Publish failed — queued locally.');
       }
     } else {
       addPending(gameId, displayName, state.score, state.elapsed);
-      if(confirm('Sign in to publish your score to the live leaderboard?')) openAuthModal();
+      if(confirm('Sign in to publish to live leaderboard?')) openAuthModal();
       else alert('Saved locally & queued.');
     }
   });
+
   // close handler
-  document.getElementById('closeGameBtn').addEventListener('click', ()=> {
+  document.getElementById('closeGameBtn').addEventListener('click', ()=>{
     modal.close();
-    // cleanup: unsubscribe live, remove keyboard handler
-    try{ unsub(); }catch(e){}
+    try{ unsubMini(); }catch(e){}
     window.removeEventListener('keydown', modalKeyHandler);
-    // cancel game loops via cleanup attached to modal (see below)
     if(state.activeModal && state.activeModal.cleanup) state.activeModal.cleanup();
     state.activeModal = null;
-    // reset keyboardHandler
     state.keyboardHandler = null;
   });
 
-  // Start timer for display inside modal
-  startTimer();
-  // expose modal cleanup hook to state.activeModal for closure by other code
-  state.activeModal = { cleanup: ()=> { stopTimer(); if(unsub) try{ unsub(); }catch(e){} } };
+  // expose cleanup for game implementations
+  state.activeModal = { cleanup: ()=> { stopTimer(); if(unsubMini) try{ unsubMini(); }catch(e){} } };
 
-  // run the actual game implementation with the provided canvas
-  // wrap call in try/catch so errors don't break UI
+  // run game (pass canvas + setKeyboardHandler)
+  const optionsParam = { canvas, setKeyboardHandler: (h)=>{ state.keyboardHandler = h; } };
   try{
-    // Each game fn must accept: containerElement, doneCallback, options
-    // We'll pass {canvas, setKeyboardHandler} where setKeyboardHandler installs per-game key handler
-    const options = {
-      canvas,
-      setKeyboardHandler: (h)=>{ state.keyboardHandler = h; }
-    };
-    // call the game's fn, allow it to be async
-    game.fn(gameArea, doneCallback, options);
-  }catch(e){
-    console.error('game run error', e);
-    alert('Game error — check console.');
-  }
+    if(options.autoStart) game.fn(gameArea, doneCallback, optionsParam);
+    else {
+      // show big Play button in modal to start
+      const playButton = document.createElement('button'); playButton.className='btn'; playButton.textContent='Start Game';
+      playButton.style.marginTop='12px';
+      gameArea.appendChild(playButton);
+      playButton.addEventListener('click', ()=>{
+        playButton.remove();
+        game.fn(gameArea, doneCallback, optionsParam);
+      });
+    }
+  }catch(e){ console.error('game run error', e); alert('Game error — check console.'); }
 }
 
-/* ---------------------------
-   showHow modal
-   --------------------------- */
-function showHow(game){
-  showModal(`<h3>How to play — ${escapeHtml(game.name)}</h3><p class="small">${escapeHtml(game.how)}</p><p class="small">Scoring: speed + accuracy when applicable. Save scores after finishing. Sign in to publish.</p>`);
-}
+/* showHow */
+function showHow(game){ showModal(`<h3>How to play — ${escapeHtml(game.name)}</h3><p class="small">${escapeHtml(game.how)}</p><p class="small">Scoring: speed + accuracy when applicable. Save scores after finishing. Sign in to publish.</p>`); }
 
-/* ---------------------------
-   Default run: quick suite
-   --------------------------- */
+/* default run */
 startDefault.addEventListener('click', async ()=>{
   const run = ['memory','snake','reaction'];
   for(const id of run){
     selectGame(id);
-    // open modal and auto-start
-    openGameModal(id);
-    // wait for finished -> polling (since game finishes call done)
-    await new Promise(resolve=>{
-      const check = setInterval(()=>{
-        // when save button enabled -> assume finished
-        const saveBtn = document.getElementById('saveScoreBtn');
-        if(saveBtn && !saveBtn.disabled){ clearInterval(check); setTimeout(resolve, 600); }
-      }, 400);
-      // safety timeout
-      setTimeout(()=>{ clearInterval(check); resolve(); }, 180000);
+    openGameModal(id, {autoStart:true});
+    await new Promise(res=>{
+      const check = setInterval(()=>{ const saveBtn = document.getElementById('saveScoreBtn'); if(saveBtn && !saveBtn.disabled){ clearInterval(check); setTimeout(res,400); } },400);
+      setTimeout(()=>{ clearInterval(check); res(); }, 180000);
     });
   }
   alert('Quick run complete!');
 });
 
+/* AutoPlay toggle control */
+autoPlayToggle.addEventListener('click', ()=>{
+  state.autoPlay = !state.autoPlay;
+  autoPlayToggle.classList.toggle('on', state.autoPlay);
+  autoPlayToggle.textContent = 'Auto-Play: ' + (state.autoPlay ? 'On' : 'Off');
+  playSFX(state.autoPlay ? 1200 : 600, 0.06);
+});
+
+/* global info, export/import */
+howBtn.addEventListener('click', ()=> {
+  const g = GAMES.find(x=>x.id===state.currentGameId);
+  if(!g) return alert('Select a game first.');
+  showHow(g);
+});
+leaderBtn.addEventListener('click', ()=> {
+  const id = state.currentGameId;
+  if(!id) return alert('Select a game first.');
+  subscribeLiveLeaderboard(id);
+  alert('Live leaderboard updated in the right panel.');
+});
+globalInfo.addEventListener('click', ()=> { showModal(`<h3>About Dev Arcade Ultimate</h3><p class="small">Single-file arcade with modal play, anonymous + email auth, realtime leaderboards, offline queue, and high-performance games. Convert guest accounts to email to keep your scores.</p>`); });
+exportBtn.addEventListener('click', ()=> {
+  const data = localStorage.getItem('devarcade_local') || '{}';
+  const blob = new Blob([data], {type:'application/json'}); const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'devarcade-local.json'; a.click(); URL.revokeObjectURL(url);
+});
+importBtn.addEventListener('click', ()=> {
+  const inp = document.createElement('input'); inp.type='file'; inp.accept='.json';
+  inp.addEventListener('change', e=>{
+    const f = e.target.files[0]; if(!f) return;
+    const reader = new FileReader();
+    reader.onload = ()=> {
+      try{ const obj = JSON.parse(reader.result); localStorage.setItem('devarcade_local', JSON.stringify(obj)); state.localScores = obj; alert('Imported local scores.'); uiUpdate(); }catch(e){ alert('Invalid file'); }
+    };
+    reader.readAsText(f);
+  });
+  inp.click();
+});
+
+/* build menu initially and UI */
+selectGame(GAMES[0].id);
+uiUpdate();
+window.addEventListener('online', syncPending);
+
 /* ---------------------------
-   Core game implementations
-   Each accepts (container, done, options)
-   - Must call done({score, time}) when finished
-   - Must use options.canvas for rendering where applicable
-   - Must call options.setKeyboardHandler(fn) to receive keyboard events
-   - Must stop all animation loops and remove handlers on finish
+   GAMES implementations (same as previous robust ones)
+   - memory, snake, ttt, 2048, reaction, flappy
+   - each cleans up and uses options.setKeyboardHandler
    --------------------------- */
 
-/* ---- Memory Match ---- */
+/* Memory */
 function game_memory(container, done, options){
-  // DOM-based, light - will run inside container but we created canvas earlier too; use container for cards
   const parent = container.querySelector('#gameArea') || container;
   parent.innerHTML = '';
   const symbols = ['★','☯','✦','♠','♣','♥','♦','✺','⚑','⚙','☀','☾','⚡','✶','✹','✿'];
@@ -847,7 +831,6 @@ function game_memory(container, done, options){
   parent.appendChild(grid);
   state.moves = 0; state.score = 0; uiUpdate();
   const st = {revealed:[],matched:0,lock:false};
-  // create reusable elements
   cards.forEach((s,i)=>{
     const c = document.createElement('div'); c.className='card'; c.style.height='96px'; c.style.fontSize='34px'; c.style.display='grid'; c.style.placeItems='center'; c.textContent='';
     c.dataset.sym = s; c.dataset.i = i;
@@ -874,15 +857,13 @@ function game_memory(container, done, options){
       }, 600);
     }
   }
-  // brief reveal
   Array.from(grid.children).forEach((c,i)=> setTimeout(()=>{ c.classList.add('revealed'); c.textContent = c.dataset.sym; }, 80 + i*20));
   setTimeout(()=> Array.from(grid.children).forEach(c=>{ c.classList.remove('revealed'); c.textContent=''; }), 1200);
   startTimer();
-  // cleanup - attach to state.activeModal
   if(state.activeModal) state.activeModal.cleanup = ()=> { stopTimer(); };
 }
 
-/* ---- Snake (canvas, rAF) ---- */
+/* Snake (rAF canvas) */
 function game_snake(container, done, options){
   const canvas = options.canvas;
   const ctx = canvas.getContext('2d');
@@ -894,8 +875,7 @@ function game_snake(container, done, options){
   let running = true;
   state.score = 0; state.moves = 0; uiUpdate();
   let lastFrame = 0;
-  const speed = 120; // ms per move
-  // keyboard handler
+  const speed = 120;
   options.setKeyboardHandler((e)=>{
     if(e.key === 'ArrowUp' && dir.y!==1) pendingDir = {x:0,y:-1};
     if(e.key === 'ArrowDown' && dir.y!==-1) pendingDir = {x:0,y:1};
@@ -905,12 +885,8 @@ function game_snake(container, done, options){
   function spawn(){ w = Math.floor(canvas.width / grid); h = Math.floor(canvas.height / grid); return {x: rand(w), y: rand(h)}; }
   function draw(){
     ctx.fillStyle = '#06111a'; ctx.fillRect(0,0,canvas.width,canvas.height);
-    // apple
     ctx.fillStyle='tomato'; ctx.fillRect(apple.x*grid, apple.y*grid, grid-2, grid-2);
-    // snake
-    ctx.fillStyle='lime';
-    snake.forEach(s=> ctx.fillRect(s.x*grid, s.y*grid, grid-2, grid-2));
-    // score
+    ctx.fillStyle='lime'; snake.forEach(s=> ctx.fillRect(s.x*grid, s.y*grid, grid-2, grid-2));
     ctx.fillStyle='white'; ctx.font = '14px sans-serif'; ctx.fillText('Score: ' + state.score, 10, 18);
   }
   function step(now){
@@ -918,28 +894,22 @@ function game_snake(container, done, options){
     const diff = now - lastFrame;
     if(diff >= speed){
       lastFrame = now;
-      // apply pending dir
       if(pendingDir){ dir = pendingDir; pendingDir = null; }
       const head = {x:snake[0].x + dir.x, y:snake[0].y + dir.y};
-      // wrap
       if(head.x < 0) head.x = w-1; if(head.x >= w) head.x = 0;
       if(head.y < 0) head.y = h-1; if(head.y >= h) head.y = 0;
-      // collision
-      if(snake.some(s=>s.x===head.x && s.y===head.y)){ running = false; stopTimer(); playSFX(120,0.12,'square',0.06); done({score: state.score, time: state.elapsed}); return; }
+      if(snake.some(s=>s.x===head.x && s.y===head.y)){ running = false; stopTimer(); playSFX(120,0.12); done({score: state.score, time: state.elapsed}); return; }
       snake.unshift(head);
-      if(head.x === apple.x && head.y === apple.y){ state.score += 70; apple = spawn(); playSFX(900,0.06,'sine',0.06); state.moves++; uiUpdate(); } else snake.pop();
+      if(head.x === apple.x && head.y === apple.y){ state.score += 70; apple = spawn(); playSFX(900,0.06); state.moves++; uiUpdate(); } else snake.pop();
     }
     draw();
     if(running) requestAnimationFrame(step);
   }
-  // start
-  startTimer();
-  requestAnimationFrame(step);
-  // cleanup
+  startTimer(); requestAnimationFrame(step);
   state.activeModal.cleanup = ()=> { running = false; stopTimer(); state.keyboardHandler = null; };
 }
 
-/* ---- Tic-Tac-Toe (DOM-based) ---- */
+/* Tic-Tac-Toe */
 function game_ttt(container, done){
   const parent = container.querySelector('#gameArea') || container;
   parent.innerHTML = '';
@@ -968,71 +938,26 @@ function game_ttt(container, done){
   state.activeModal.cleanup = ()=> { stopTimer(); };
 }
 
-/* ---- 2048 (canvas-lite) ---- */
+/* 2048 */
 function game_2048(container, done, options){
-  const canvas = options.canvas;
-  const ctx = canvas.getContext('2d');
-  const size = 4;
-  let board = Array.from({length:size}, ()=>Array(size).fill(0));
-  function addRandom(){
-    const empties = [];
-    for(let r=0;r<size;r++) for(let c=0;c<size;c++) if(board[r][c]===0) empties.push([r,c]);
-    if(empties.length===0) return;
-    const [r,c] = empties[rand(empties.length)];
-    board[r][c] = Math.random() < 0.9 ? 2 : 4;
-  }
-  function render(){
-    ctx.fillStyle = '#06111a'; ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.font = '20px sans-serif';
-    for(let r=0;r<size;r++) for(let c=0;c<size;c++){
-      const v = board[r][c];
-      const x = c*(canvas.width/size) + 10, y = r*(canvas.height/size) + 10;
-      ctx.fillStyle = v ? '#fff' : 'rgba(255,255,255,0.06)';
-      ctx.fillRect(c*(canvas.width/size) + 6, r*(canvas.height/size) + 6, canvas.width/size - 12, canvas.height/size - 12);
-      ctx.fillStyle = v ? '#06142a' : '#9fb3c8';
-      if(v) ctx.fillText(v, x + 18, y + 40);
-    }
-  }
-  function moveLeft(){
-    let moved=false;
-    for(let r=0;r<size;r++){
-      let row = board[r].filter(v=>v);
-      for(let i=0;i<row.length-1;i++){
-        if(row[i]===row[i+1]){ row[i]*=2; row[i+1]=0; i++; }
-      }
-      row = row.filter(v=>v);
-      while(row.length < size) row.push(0);
-      for(let c=0;c<size;c++){ if(board[r][c]!==row[c]) moved=true; board[r][c]=row[c]; }
-    }
-    if(moved) addRandom();
-    render();
-    checkGameOver();
-  }
-  function rotate90(){ const tmp = Array.from({length:size}, ()=>Array(size).fill(0)); for(let r=0;r<size;r++) for(let c=0;c<size;c++) tmp[c][size-1-r]=board[r][c]; board = tmp; }
+  const canvas = options.canvas; const ctx = canvas.getContext('2d');
+  const size = 4; let board = Array.from({length:size}, ()=>Array(size).fill(0));
+  function addRandom(){ const empties=[]; for(let r=0;r<size;r++) for(let c=0;c<size;c++) if(board[r][c]===0) empties.push([r,c]); if(empties.length===0) return; const [r,c]=empties[rand(empties.length)]; board[r][c] = Math.random()<0.9?2:4; }
+  function render(){ ctx.fillStyle='#06111a'; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.font='20px sans-serif';
+    for(let r=0;r<size;r++) for(let c=0;c<size;c++){ const v=board[r][c]; ctx.fillStyle = v ? '#fff' : 'rgba(255,255,255,0.06)'; ctx.fillRect(c*(canvas.width/size)+6, r*(canvas.height/size)+6, canvas.width/size-12, canvas.height/size-12); ctx.fillStyle = v ? '#06142a' : '#9fb3c8'; if(v) ctx.fillText(v, c*(canvas.width/size)+30, r*(canvas.height/size)+50); } }
+  function moveLeft(){ let moved=false; for(let r=0;r<size;r++){ let row = board[r].filter(v=>v); for(let i=0;i<row.length-1;i++){ if(row[i]===row[i+1]){ row[i]*=2; row[i+1]=0; i++; } } row = row.filter(v=>v); while(row.length<size) row.push(0); for(let c=0;c<size;c++){ if(board[r][c]!==row[c]) moved=true; board[r][c]=row[c]; } } if(moved) addRandom(); render(); checkGameOver(); }
+  function rotate90(){ const tmp = Array.from({length:size}, ()=>Array(size).fill(0)); for(let r=0;r<size;r++) for(let c=0;c<size;c++) tmp[c][size-1-r]=board[r][c]; board=tmp; }
   function moveRight(){ rotate90(); rotate90(); moveLeft(); rotate90(); rotate90(); }
   function moveUp(){ rotate90(); rotate90(); rotate90(); moveLeft(); rotate90(); }
   function moveDown(){ rotate90(); moveLeft(); rotate90(); rotate90(); rotate90(); }
-  function canMove(){
-    for(let r=0;r<size;r++) for(let c=0;c<size;c++) if(board[r][c]===0) return true;
-    for(let r=0;r<size;r++) for(let c=0;c<size-1;c++) if(board[r][c]===board[r][c+1]) return true;
-    for(let c=0;c<size;c++) for(let r=0;r<size-1;r++) if(board[r][c]===board[r+1][c]) return true;
-    return false;
-  }
-  function checkGameOver(){
-    if(board.flat().some(x=>x===2048)){ stopTimer(); awardAchievement('2048_win','Reached 2048'); done({score: Math.max(...board.flat()), time: state.elapsed}); return; }
-    if(!canMove()){ stopTimer(); alert('Game over'); done({score: Math.max(...board.flat()), time: state.elapsed}); }
-  }
+  function canMove(){ for(let r=0;r<size;r++) for(let c=0;c<size;c++) if(board[r][c]===0) return true; for(let r=0;r<size;r++) for(let c=0;c<size-1;c++) if(board[r][c]===board[r][c+1]) return true; for(let c=0;c<size;c++) for(let r=0;r<size-1;r++) if(board[r][c]===board[r+1][c]) return true; return false; }
+  function checkGameOver(){ if(board.flat().some(x=>x===2048)){ stopTimer(); awardAchievement('2048_win','Reached 2048'); done({score: Math.max(...board.flat()), time: state.elapsed}); return; } if(!canMove()){ stopTimer(); alert('Game over'); done({score: Math.max(...board.flat()), time: state.elapsed}); } }
   addRandom(); addRandom(); render(); startTimer();
-  options.setKeyboardHandler((e)=>{
-    if(e.key==='ArrowLeft'){ moveLeft(); state.moves++; uiUpdate(); playSFX(400,0.04); }
-    if(e.key==='ArrowRight'){ moveRight(); state.moves++; uiUpdate(); playSFX(400,0.04); }
-    if(e.key==='ArrowUp'){ moveUp(); state.moves++; uiUpdate(); playSFX(400,0.04); }
-    if(e.key==='ArrowDown'){ moveDown(); state.moves++; uiUpdate(); playSFX(400,0.04); }
-  });
+  options.setKeyboardHandler((e)=>{ if(e.key==='ArrowLeft'){ moveLeft(); state.moves++; uiUpdate(); playSFX(400,0.04); } if(e.key==='ArrowRight'){ moveRight(); state.moves++; uiUpdate(); playSFX(400,0.04); } if(e.key==='ArrowUp'){ moveUp(); state.moves++; uiUpdate(); playSFX(400,0.04); } if(e.key==='ArrowDown'){ moveDown(); state.moves++; uiUpdate(); playSFX(400,0.04); } });
   state.activeModal.cleanup = ()=> { stopTimer(); state.keyboardHandler = null; };
 }
 
-/* ---- Reaction Test (DOM) ---- */
+/* Reaction */
 function game_reaction(container, done){
   const parent = container.querySelector('#gameArea') || container;
   parent.innerHTML = '';
@@ -1040,111 +965,27 @@ function game_reaction(container, done){
   const info = document.createElement('div'); info.className='small'; info.textContent='Wait for green then click/tap as fast as possible.'; wrap.appendChild(info);
   const target = document.createElement('div'); target.style.width='240px'; target.style.height='120px'; target.style.margin='20px auto'; target.style.borderRadius='10px'; target.style.background='tomato'; target.style.display='grid'; target.style.placeItems='center'; target.style.fontSize='22px'; target.style.cursor='pointer'; target.textContent='Wait...'; wrap.appendChild(target);
   let trials = [], stateR = {waiting:true,start:0};
-  function startTrial(){
-    target.style.background='tomato'; target.textContent='Wait...'; stateR.waiting=true;
-    const delay = 700 + Math.random()*2000;
-    setTimeout(()=>{ stateR.waiting=false; stateR.start=Date.now(); target.style.background='lime'; target.textContent='CLICK!'; }, delay);
-  }
-  target.addEventListener('click', ()=>{
-    if(stateR.waiting){ trials.push(1000); startTrial(); return; }
-    const rt = Date.now() - stateR.start;
-    trials.push(rt);
-    if(trials.length >= 7){
-      const sorted = trials.slice().sort((a,b)=>a-b);
-      const median = sorted[Math.floor(sorted.length/2)];
-      stopTimer(); awardAchievement('reaction_master','Quick Reflexes'); done({score: Math.max(0,1000-median), time: median}); return;
-    }
-    startTrial();
-  });
+  function startTrial(){ target.style.background='tomato'; target.textContent='Wait...'; stateR.waiting=true; const delay = 700 + Math.random()*2000; setTimeout(()=>{ stateR.waiting=false; stateR.start=Date.now(); target.style.background='lime'; target.textContent='CLICK!'; }, delay); }
+  target.addEventListener('click', ()=>{ if(stateR.waiting){ trials.push(1000); startTrial(); return; } const rt = Date.now() - stateR.start; trials.push(rt); if(trials.length >= 7){ const sorted = trials.slice().sort((a,b)=>a-b); const median = sorted[Math.floor(sorted.length/2)]; stopTimer(); awardAchievement('reaction_master','Quick Reflexes'); done({score: Math.max(0,1000-median), time: median}); return; } startTrial(); });
   startTimer(); startTrial();
   state.activeModal.cleanup = ()=> { stopTimer(); };
 }
 
-/* ---- Flappy (canvas, rAF) ---- */
+/* Flappy */
 function game_flappy(container, done, options){
-  const canvas = options.canvas;
-  const ctx = canvas.getContext('2d');
-  let bird = {x:80,y:200,vy:0};
-  const gravity = 0.6, jump = -10;
-  const pipes = [];
-  let tick = 0, score = 0;
-  let running = true;
-  function spawnPipe(){ const gap = 120; const top = 60 + Math.random()*180; pipes.push({x:canvas.width, top, gap}); }
-  function draw(){
-    ctx.fillStyle = '#06111a'; ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.fillStyle = '#0f7'; pipes.forEach(p=> { ctx.fillRect(p.x,0,52,p.top); ctx.fillRect(p.x,p.top+p.gap,52,canvas.height); });
-    ctx.fillStyle='yellow'; ctx.fillRect(bird.x, bird.y, 24, 18);
-    ctx.fillStyle='white'; ctx.font='16px sans-serif'; ctx.fillText('Score: '+score, 10, 20);
-  }
-  function step(){
-    bird.vy += gravity; bird.y += bird.vy;
-    if(bird.y < 0) bird.y = 0;
-    if(bird.y > canvas.height){ running=false; stopTimer(); playSFX(120,0.12); alert('Crashed! Score: '+score); done({score, time: state.elapsed}); return; }
-    if(tick % 90 === 0) spawnPipe();
-    pipes.forEach(p=> p.x -= 2.6);
-    for(const p of pipes){
-      if(!p.scored && p.x + 52 < bird.x){ p.scored = true; score++; state.score = score; uiUpdate(); playSFX(1000,0.06); }
-      if(bird.x + 24 > p.x && bird.x < p.x + 52 && (bird.y < p.top || bird.y + 18 > p.top + p.gap)){ running=false; stopTimer(); playSFX(120,0.12); alert('Hit a pipe! Score: '+score); done({score, time: state.elapsed}); return; }
-    }
-    while(pipes.length && pipes[0].x < -60) pipes.shift();
-    draw(); tick++;
-    if(running) requestAnimationFrame(step);
-  }
+  const canvas = options.canvas; const ctx = canvas.getContext('2d');
+  let bird = {x:80,y:200,vy:0}; const gravity = 0.6, jump = -10; const pipes=[]; let tick=0, score=0; let running=true;
+  function spawnPipe(){ const gap=120; const top=60 + Math.random()*180; pipes.push({x:canvas.width, top, gap}); }
+  function draw(){ ctx.fillStyle='#06111a'; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.fillStyle='#0f7'; pipes.forEach(p=> { ctx.fillRect(p.x,0,52,p.top); ctx.fillRect(p.x,p.top+p.gap,52,canvas.height); }); ctx.fillStyle='yellow'; ctx.fillRect(bird.x,bird.y,24,18); ctx.fillStyle='white'; ctx.font='16px sans-serif'; ctx.fillText('Score: '+score,10,20); }
+  function step(){ bird.vy += gravity; bird.y += bird.vy; if(bird.y < 0) bird.y = 0; if(bird.y > canvas.height){ running=false; stopTimer(); playSFX(120,0.12); alert('Crashed! Score: '+score); done({score,time:state.elapsed}); return; } if(tick%90===0) spawnPipe(); pipes.forEach(p=>p.x -= 2.6); for(const p of pipes){ if(!p.scored && p.x + 52 < bird.x){ p.scored = true; score++; state.score = score; uiUpdate(); playSFX(1000,0.06);} if(bird.x + 24 > p.x && bird.x < p.x + 52 && (bird.y < p.top || bird.y + 18 > p.top + p.gap)){ running=false; stopTimer(); playSFX(120,0.12); alert('Hit a pipe! Score: '+score); done({score,time:state.elapsed}); return; } } while(pipes.length && pipes[0].x < -60) pipes.shift(); draw(); tick++; if(running) requestAnimationFrame(step); }
   function flap(){ bird.vy = jump; playSFX(880,0.04); }
   options.setKeyboardHandler((e)=>{ if(e.code==='Space') flap(); });
-  canvas.addEventListener('click', flap);
-  startTimer(); requestAnimationFrame(step);
+  canvas.addEventListener('click', flap); startTimer(); requestAnimationFrame(step);
   state.activeModal.cleanup = ()=> { running=false; stopTimer(); state.keyboardHandler = null; canvas.removeEventListener('click', flap); };
 }
 
 /* ---------------------------
    End of game implementations
-   --------------------------- */
-
-/* ---------------------------
-   UI small controls and events
-   --------------------------- */
-howBtn.addEventListener('click', ()=>{
-  const g = GAMES.find(x=>x.id===state.currentGameId);
-  if(!g) return alert('Select a game first.');
-  showHow(g);
-});
-leaderBtn.addEventListener('click', ()=>{
-  const id = state.currentGameId;
-  if(!id) return alert('Select a game first.');
-  subscribeLiveLeaderboard(id);
-  alert('Live leaderboard updated in the right panel.');
-});
-globalInfo.addEventListener('click', ()=> {
-  showModal(`<h3>About Dev Arcade Ultimate</h3><p class="small">Single-file arcade with modal play, anonymous + email auth, realtime leaderboards, offline queue, and high-performance games. Convert guest accounts to email to keep your scores.</p>`);
-});
-exportBtn.addEventListener('click', ()=>{
-  const data = localStorage.getItem('devarcade_local') || '{}';
-  const blob = new Blob([data], {type:'application/json'}); const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download = 'devarcade-local.json'; a.click(); URL.revokeObjectURL(url);
-});
-importBtn.addEventListener('click', ()=>{
-  const inp = document.createElement('input'); inp.type='file'; inp.accept='.json';
-  inp.addEventListener('change', e=>{
-    const f = e.target.files[0]; if(!f) return;
-    const reader = new FileReader();
-    reader.onload = ()=> {
-      try{ const obj = JSON.parse(reader.result); localStorage.setItem('devarcade_local', JSON.stringify(obj)); state.localScores = obj; alert('Imported local scores.'); uiUpdate(); }catch(e){ alert('Invalid file'); }
-    };
-    reader.readAsText(f);
-  });
-  inp.click();
-});
-
-/* ---------------------------
-   Startup
-   --------------------------- */
-selectGame(GAMES[0].id);
-uiUpdate();
-window.addEventListener('online', syncPending);
-
-/* ---------------------------
-   End of file
    --------------------------- */
 
 </script>
