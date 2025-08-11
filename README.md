@@ -55,5 +55,9 @@ This isn’t just another project — it’s a **fully optimized, self-contained
 - **Assets:** Custom icons, arcade audio loops
 - **Deployment:** Firebase Hosting / GitHub Pages
 
+---
+
+## SOCIALS
+
 - LIVE PREVIEW - https://sayeedhere.github.io/dev-arcade/
 - LINKEDIN https://www.linkedin.com/in/sayeed-here/
